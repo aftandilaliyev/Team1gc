@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from loguru import logger
 
 from src.domains.health.router import router as health_router
 
@@ -14,4 +15,5 @@ def get_app() -> FastAPI:
         version="0.1.0",
     )
     _setup_router(app)
+    logger.info("Application initialized")
     return app
