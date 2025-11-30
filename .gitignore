@@ -1,2 +1,3 @@
 dev_scripts
 .env
+__pycache__

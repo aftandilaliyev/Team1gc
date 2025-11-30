@@ -3,9 +3,10 @@ from typing import Optional, Dict, Any
 
 import jwt
 from fastapi import HTTPException, status
+from sqlalchemy.sql import roles
 
 from src.shared.models.user import User, get_password_hash, verify_password
-from src.shared.schemas.user import AuthResponse, UserCreate, UserLogin, UserResponse
+from src.shared.schemas.user import AuthResponse, UserCreate, UserLogin, UserResponse, UserRoleEnum
 from src.shared.config import settings
 
 
@@ -37,7 +38,10 @@ class AuthService:
         return self.session.query(User).filter(User.email == email).first()
 
     def get_user_by_access_token(self, token: str) -> Optional[User]:
-        username = self._get_user_by_username(self._verify_token(token).get("sub"))
+        payload = self._verify_token(token)
+        if not payload:
+            return None
+        username = payload.get("sub")
         if not username:
             return None
         return self._get_user_by_username(username)
@@ -71,6 +75,7 @@ class AuthService:
             email=user_data.email,
             username=user_data.username,
             hashed_password=hashed_password,
+            role=user_data.role,
             is_active=True
         )
         
@@ -84,10 +89,11 @@ class AuthService:
             email=db_user.email,
             username=db_user.username,
             is_active=db_user.is_active,
-            created_at=db_user.created_at
+            created_at=db_user.created_at,
+            role=db_user.role
         )
 
-    def login_user(self, login_data: UserLogin) -> Dict[str, Any]:
+    def login_user(self, login_data: UserLogin) -> AuthResponse:
         user = self.authenticate_user(login_data.username, login_data.password)
         if not user:
             raise HTTPException(
@@ -108,6 +114,7 @@ class AuthService:
                 email=user.email,
                 username=user.username,
                 is_active=user.is_active,
-                created_at=user.created_at
+                created_at=user.created_at,
+                role=user.role
             )
         )

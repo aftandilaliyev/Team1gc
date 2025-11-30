@@ -14,6 +14,7 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
+    role = Column(String)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

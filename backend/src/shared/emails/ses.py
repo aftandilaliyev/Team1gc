@@ -1,1 +1,0 @@
-# TODO: Write utility functions for sending emails via AWS SDK
