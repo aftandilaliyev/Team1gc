@@ -2,9 +2,11 @@ from fastapi import FastAPI
 from loguru import logger
 
 from src.domains.health.router import router as health_router
+from src.domains.auth.router import router as auth_router
 
 def _setup_router(app: FastAPI):
     app.include_router(health_router)
+    app.include_router(auth_router)
     # TODO: Include the routers from the domains
     ...
 

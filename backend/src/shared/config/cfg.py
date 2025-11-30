@@ -2,8 +2,20 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    ENVIRONMENT: str
-    DATABASE_URL: str
+    ENVIRONMENT: str = "development"
+    
+    # Database settings
+    DATABASE_URL: str = ""
+    DB_HOST: str = "localhost"
+    DB_PORT: int = 3306
+    DB_USER: str = "root"
+    DB_PASSWORD: str = ""
+    DB_NAME: str = "team1gc_db"
+
+
+    SECRET_KEY: str = "your-secret-key-change-in-production"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
 
     model_config = SettingsConfigDict(
@@ -15,5 +27,12 @@ class Settings(BaseSettings):
     @property
     def DEBUG(self) -> bool:
         return self.ENVIRONMENT == "development"
+    
+    @property
+    def get_database_url(self) -> str:
+        """Get the database URL. If DATABASE_URL is set, use it. Otherwise, build from components."""
+        if self.DATABASE_URL:
+            return self.DATABASE_URL
+        return f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
 settings = Settings()

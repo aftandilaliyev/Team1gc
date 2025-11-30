@@ -21,6 +21,8 @@ services:
     build: .
     container_name: gem_store_app
     restart: always
+    env_file:
+      - .env
     ports:
       - "8000:8000"
     environment:

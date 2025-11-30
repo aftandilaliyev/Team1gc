@@ -5,6 +5,7 @@ from src.core.logger import setup_logger
 
 
 setup_logger() # NOTE: Logger setup should be first executed function in application after environment variables are loaded
+
 app = get_app()
 
 
