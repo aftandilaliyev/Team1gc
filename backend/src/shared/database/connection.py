@@ -1,10 +1,10 @@
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker, declarative_base
 
 from src.shared.config import settings
 
 
-engine = create_async_engine(
+engine = create_engine(
     settings.get_database_url,
     echo=settings.DEBUG,
     pool_size=20,
@@ -14,13 +14,13 @@ engine = create_async_engine(
 )
 SessionLocal = sessionmaker(
     bind=engine,
-    class_=AsyncSession,
+    class_=Session,
     expire_on_commit=False
 )
 Base = declarative_base()
 
 
-async def get_session() -> AsyncSession:
+async def get_session() -> Session:
     async with SessionLocal() as session:
         try:
             yield session
