@@ -1,17 +1,17 @@
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
+from typing import Optional
 
 import jwt
 from fastapi import HTTPException, status
-from sqlalchemy.sql import roles
+from sqlalchemy.orm import Session
 
 from src.shared.models.user import User, get_password_hash, verify_password
-from src.shared.schemas.user import AuthResponse, UserCreate, UserLogin, UserResponse, UserRoleEnum
+from src.shared.schemas.user import AuthResponse, UserCreate, UserLogin, UserResponse
 from src.shared.config import settings
 
 
 class AuthService:
-    def __init__(self, session) -> None:
+    def __init__(self, session: Session) -> None:
         self.session = session
 
     def _create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None):
