@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr, Field
 class UserRoleEnum(StrEnum):
     BUYER = "buyer"
     SELLER = "seller"
-    SUPPLIER = "suplier"
+    SUPPLIER = "supplier"
 
 class UserBase(BaseModel):
     email: EmailStr

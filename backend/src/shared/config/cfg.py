@@ -17,6 +17,15 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
+    # DodoPayments settings
+    DODO_PAYMENTS_API_KEY: str = ""
+    DODO_PAYMENTS_BASE_URL: str = "https://api.dodopayments.com"
+    DODO_PAYMENTS_WEBHOOK_SECRET: str = ""
+    
+    # Frontend/Backend URLs for payment redirects
+    FRONTEND_URL: str = "http://localhost:3000"
+    BACKEND_URL: str = "http://localhost:8000"
+
     # AWS settings
     AWS_ACCESS_KEY_ID: str = ""
     AWS_SECRET_ACCESS_KEY: str = ""

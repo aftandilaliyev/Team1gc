@@ -20,4 +20,5 @@ dependencies = [
     "pymysql>=1.1.0",
     "pytest>=7.4.0",
     "pytest-asyncio>=0.21.0",
+    "dodopayments>=1.61.6",
 ]

@@ -1,16 +1,24 @@
 from typing import TYPE_CHECKING
 from datetime import datetime
+from enum import Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from passlib.context import CryptContext
 
-from .base import Base
+from src.infrastructure.database import Base
 
 if TYPE_CHECKING:
     from .payments import Customer
+    from .product import Product
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+class UserRole(Enum):
+    BUYER = "buyer"
+    SELLER = "seller"
+    SUPPLIER = "supplier"
 
 
 class User(Base):
@@ -30,12 +38,13 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(
         server_default='1', default=True
     )
-    role: Mapped[str] = mapped_column(server_default='user')
+    role: Mapped[str] = mapped_column(server_default=UserRole.BUYER.value)
     created_at: Mapped[datetime] = mapped_column(
         server_default=func.now(), nullable=False
     )
 
     customer: Mapped["Customer"] = relationship("Customer", back_populates="user")
+    products: Mapped["Product"] = relationship("Product", back_populates="seller")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

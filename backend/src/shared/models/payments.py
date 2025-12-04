@@ -4,7 +4,7 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.src.shared.models.base import Base
+from src.infrastructure.database import Base
 
 if TYPE_CHECKING:
     from .user import User
