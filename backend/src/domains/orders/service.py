@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from backend.src.shared.schemas.payment import WebhookRequest
+from src.shared.schemas.payment import WebhookRequest
 
 
 class OrderService:

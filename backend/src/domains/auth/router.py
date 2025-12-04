@@ -1,6 +1,6 @@
 from typing import Annotated, Dict, Any
 
-from fastapi import APIRouter, Header, status
+from fastapi import APIRouter, Header, status, Depends
 
 from src.shared.schemas.user import UserCreate, UserLogin, UserResponse
 from src.domains.auth.service import AuthService
@@ -11,14 +11,14 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def register(user_data: UserCreate, service: Annotated[AuthService, get_auth_service]) -> UserResponse:
+async def register(user_data: UserCreate, service: Annotated[AuthService, Depends(get_auth_service)]) -> UserResponse:
     """
     Register a new user with email, username, and password.
     """
     return service.register_user(user_data)
 
 @router.post("/login", response_model=Dict[str, Any])
-async def login(login_data: UserLogin, service: Annotated[AuthService, get_auth_service]) -> Dict[str, Any]:
+async def login(login_data: UserLogin, service: Annotated[AuthService, Depends(get_auth_service)]) -> Dict[str, Any]:
     """
     Login with username and password to get access token.
     """
@@ -27,9 +27,9 @@ async def login(login_data: UserLogin, service: Annotated[AuthService, get_auth_
 @router.get("/me", response_model=UserResponse)
 async def get_me(
         access_token: Annotated[str, Header(alias="X-Auth-Header")],
-        service: Annotated[AuthService, get_auth_service]
+        service: Annotated[AuthService, Depends(get_auth_service)]
     ) -> UserResponse:
     """
     Get current user information from JWT token.
     """
-    return service._verify_token
+    return service.get_current_user(access_token)
