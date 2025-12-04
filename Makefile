@@ -7,6 +7,11 @@ sdk-push:
 
 # Backend setup and run
 backend-setup:
+	@if [ ! -f backend/.env ]; then \
+		echo "Error: backend/.env file not found. Please create it before running."; \
+		exit 1; \
+	fi
+
 	cd backend && docker compose up --build -d
 
 backend-down:
