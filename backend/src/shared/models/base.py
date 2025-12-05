@@ -1,0 +1,1 @@
+# TODO: Write abstract classes for database models

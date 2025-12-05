@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -87,4 +88,95 @@
 
 <script src="script.js"></script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Lumileya Gemstone – Catalog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Libre Baskerville -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+<div class="page">
+
+ <header>
+  <div class="header-row">
+
+    <!-- Centered logo -->
+    <img src="images/logo.png" class="logo-center" alt="Lumileya Logo">
+
+    <!-- Right side: brand + socials + language -->
+    <div class="header-right-block">
+      <div class="brand-line">
+        <h1 class="brand-name">Lumileya Gemstone</h1>
+
+        <div class="socials">
+          <a href="https://www.instagram.com/lumileya_gemstone?igsh=MWVzcTludWE4MjZzdg==" target="_blank">
+            <img src="images/instagram.svg" class="social-icon">
+          </a>
+          <a href="https://www.tiktok.com/@lumileya_gemstone?_r=1&_d=f0f05f10j3dhbk" target="_blank">
+            <img src="images/tiktok.svg" class="social-icon">
+          </a>
+        </div>
+      </div>
+
+      <div class="sub" data-text="subtitle">Каталог украшений из натуральных камней</div>
+
+      <select id="lang" class="lang-select">
+        <option value="ru">RU</option>
+        <option value="en">EN</option>
+      </select>
+    </div>
+
+  </div>
+</header>
+
+
+  <div class="controls">
+    <div class="control">
+      <span data-text="sortLabel">Сортировка:</span>
+      <select id="sort">
+        <option value="default">—</option>
+        <option value="price-asc">Цена дороже</option>
+        <option value="price-desc">Цена дешевле</option>
+        <option value="name-asc">A–Z</option>
+      </select>
+    </div>
+    <div class="control">
+      <span data-text="filterLabel">Фильтр по знаку:</span>
+      <select id="zodiac"></select>
+    </div>
+  </div>
+
+  <div class="main-row">
+    <div id="grid" class="grid"></div>
+
+    <aside class="cart">
+      <div class="cart-header">
+        <span class="cart-title" data-text="cartTitle">Корзина</span>
+        <span class="cart-count" id="cart-count">0</span>
+      </div>
+      <div class="cart-items" id="cart-items">
+        <div class="cart-empty" data-text="cartEmpty">Корзина пуста</div>
+      </div>
+      <div class="cart-total">
+        <span data-text="cartTotalLabel">Итого:</span>
+        <span id="cart-total">0 AZN</span>
+      </div>
+    </aside>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+>>>>>>> 5154e3f6a42bbb3e9a478507bd56bbf75fb80f8f
 </html> 
