@@ -4,7 +4,7 @@ const stones = [
     id: "amethyst",
     name: { ru: "Аметист", en: "Amethyst" },
     price: 37,
-    image: "images/amethyst.jpg",
+    image: "images/amethyst.JPG",
     desc: {
       ru: "Камень спокойствия и интуиции.",
       en: "Stone of calm and intuition."
@@ -15,7 +15,7 @@ const stones = [
     id: "citrine",
     name: { ru: "Цитрин", en: "Citrine" },
     price: 35,
-    image: "images/citrine.jpg",
+    image: "images/citrine.JPG",
     desc: {
       ru: "Камень радости и удачи.",
       en: "Stone of joy and luck."
@@ -59,7 +59,7 @@ const stones = [
     id: "lapis",
     name: { ru: "Лазурит", en: "Lapis Lazuli" },
     price: 35,
-    image: "images/lapis.jpg",
+    image: "images/lapis.JPG",
     desc: {
       ru: "Камень честности и мудрости.",
       en: "Stone of honesty and wisdom."
@@ -70,7 +70,7 @@ const stones = [
     id: "jade",
     name: { ru: "Нефрит", en: "Jade" },
     price: 28,
-    image: "images/jade.jpg",
+    image: "images/jade.JPG",
     desc: {
       ru: "Камень стабильности и гармонии.",
       en: "Stone of stability and harmony."
@@ -103,7 +103,7 @@ const stones = [
     id: "turquoise",
     name: { ru: "Фируза", en: "Turquoise" },
     price: 29,
-    image: "images/turquoise.jpg",
+    image: "images/turquoise.JPG",
     desc: {
       ru: "Камень защиты, баланса и удачи.",
       en: "Stone of protection, balance and luck."
@@ -158,7 +158,7 @@ const stones = [
     id: "brooch",
     name: { ru: "Брошь", en: "Brooch" },
     price: 30,
-    image: "images/brooch.jpg",
+    image: "images/brooch.JPG",
     desc: {
       ru: "Аксессуар ручной работы.",
       en: "Handmade accessory."
@@ -169,7 +169,7 @@ const stones = [
     id: "keychain",
     name: { ru: "Брелок", en: "Keychain" },
     price: 25,
-    image: "images/keychain.jpg",
+    image: "images/keychain.JPG",
     desc: {
       ru: "Декоративный брелок для привлечения финансового изобилия.",
       en: "Decorative keychain to attract financial abundance."
