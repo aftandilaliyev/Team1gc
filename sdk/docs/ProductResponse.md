@@ -8,9 +8,10 @@ Name | Type | Description | Notes
 **name** | **string** |  | [default to undefined]
 **price** | **string** |  | [default to undefined]
 **description** | **string** |  | [optional] [default to undefined]
+**stock_quantity** | **number** |  | [optional] [default to 0]
 **id** | **string** |  | [default to undefined]
-**seller_id** | **string** |  | [default to undefined]
-**type_id** | **string** |  | [default to undefined]
+**seller_id** | **number** |  | [default to undefined]
+**product_type** | **string** |  | [optional] [default to undefined]
 **created_at** | **string** |  | [default to undefined]
 **updated_at** | **string** |  | [default to undefined]
 **images** | [**Array&lt;ProductImageResponse&gt;**](ProductImageResponse.md) |  | [optional] [default to undefined]
@@ -24,9 +25,10 @@ const instance: ProductResponse = {
     name,
     price,
     description,
+    stock_quantity,
     id,
     seller_id,
-    type_id,
+    product_type,
     created_at,
     updated_at,
     images,

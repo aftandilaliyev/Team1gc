@@ -8,7 +8,8 @@ Name | Type | Description | Notes
 **name** | **string** |  | [default to undefined]
 **price** | [**Price**](Price.md) |  | [default to undefined]
 **description** | **string** |  | [optional] [default to undefined]
-**type_id** | **string** |  | [default to undefined]
+**stock_quantity** | **number** |  | [optional] [default to 0]
+**product_type** | **string** |  | [optional] [default to undefined]
 **images** | [**Array&lt;ProductImageCreate&gt;**](ProductImageCreate.md) |  | [optional] [default to undefined]
 
 ## Example
@@ -20,7 +21,8 @@ const instance: ProductCreate = {
     name,
     price,
     description,
-    type_id,
+    stock_quantity,
+    product_type,
     images,
 };
 ```

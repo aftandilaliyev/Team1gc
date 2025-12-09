@@ -8,7 +8,8 @@ Name | Type | Description | Notes
 **name** | **string** |  | [optional] [default to undefined]
 **price** | [**Price1**](Price1.md) |  | [optional] [default to undefined]
 **description** | **string** |  | [optional] [default to undefined]
-**type_id** | **string** |  | [optional] [default to undefined]
+**product_type** | **string** |  | [optional] [default to undefined]
+**stock_quantity** | **number** |  | [optional] [default to undefined]
 
 ## Example
 
@@ -19,7 +20,8 @@ const instance: ProductUpdate = {
     name,
     price,
     description,
-    type_id,
+    product_type,
+    stock_quantity,
 };
 ```
 

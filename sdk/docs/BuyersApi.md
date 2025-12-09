@@ -377,7 +377,7 @@ let page: number; // (optional) (default to 1)
 let perPage: number; // (optional) (default to 20)
 let priceMin: number; // (optional) (default to undefined)
 let priceMax: number; // (optional) (default to undefined)
-let category: string; // (optional) (default to undefined)
+let productType: string; // (optional) (default to undefined)
 let search: string; // (optional) (default to undefined)
 let sort: string; // (optional) (default to 'created_at')
 let order: string; // (optional) (default to 'desc')
@@ -387,7 +387,7 @@ const { status, data } = await apiInstance.getProductsApiV1BuyersProductsGet(
     perPage,
     priceMin,
     priceMax,
-    category,
+    productType,
     search,
     sort,
     order
@@ -402,7 +402,7 @@ const { status, data } = await apiInstance.getProductsApiV1BuyersProductsGet(
 | **perPage** | [**number**] |  | (optional) defaults to 20|
 | **priceMin** | [**number**] |  | (optional) defaults to undefined|
 | **priceMax** | [**number**] |  | (optional) defaults to undefined|
-| **category** | [**string**] |  | (optional) defaults to undefined|
+| **productType** | [**string**] |  | (optional) defaults to undefined|
 | **search** | [**string**] |  | (optional) defaults to undefined|
 | **sort** | [**string**] |  | (optional) defaults to 'created_at'|
 | **order** | [**string**] |  | (optional) defaults to 'desc'|

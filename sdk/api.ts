@@ -377,10 +377,16 @@ export interface ProductCreate {
     'description'?: string | null;
     /**
      * 
+     * @type {number}
+     * @memberof ProductCreate
+     */
+    'stock_quantity'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof ProductCreate
      */
-    'type_id': string;
+    'product_type'?: string | null;
     /**
      * 
      * @type {Array<ProductImageCreate>}
@@ -489,22 +495,28 @@ export interface ProductResponse {
     'description'?: string | null;
     /**
      * 
+     * @type {number}
+     * @memberof ProductResponse
+     */
+    'stock_quantity'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof ProductResponse
      */
     'id': string;
     /**
      * 
-     * @type {string}
+     * @type {number}
      * @memberof ProductResponse
      */
-    'seller_id': string;
+    'seller_id': number;
     /**
      * 
      * @type {string}
      * @memberof ProductResponse
      */
-    'type_id': string;
+    'product_type'?: string | null;
     /**
      * 
      * @type {string}
@@ -553,7 +565,13 @@ export interface ProductUpdate {
      * @type {string}
      * @memberof ProductUpdate
      */
-    'type_id'?: string | null;
+    'product_type'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProductUpdate
+     */
+    'stock_quantity'?: number | null;
 }
 /**
  * 
@@ -1281,14 +1299,14 @@ export const BuyersApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {number} [perPage] 
          * @param {number} [priceMin] 
          * @param {number} [priceMax] 
-         * @param {string} [category] 
+         * @param {string} [productType] 
          * @param {string} [search] 
          * @param {string} [sort] 
          * @param {string} [order] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getProductsApiV1BuyersProductsGet: async (page?: number, perPage?: number, priceMin?: number, priceMax?: number, category?: string, search?: string, sort?: string, order?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getProductsApiV1BuyersProductsGet: async (page?: number, perPage?: number, priceMin?: number, priceMax?: number, productType?: string, search?: string, sort?: string, order?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v1/buyers/products`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1317,8 +1335,8 @@ export const BuyersApiAxiosParamCreator = function (configuration?: Configuratio
                 localVarQueryParameter['price_max'] = priceMax;
             }
 
-            if (category !== undefined) {
-                localVarQueryParameter['category'] = category;
+            if (productType !== undefined) {
+                localVarQueryParameter['product_type'] = productType;
             }
 
             if (search !== undefined) {
@@ -1531,15 +1549,15 @@ export const BuyersApiFp = function(configuration?: Configuration) {
          * @param {number} [perPage] 
          * @param {number} [priceMin] 
          * @param {number} [priceMax] 
-         * @param {string} [category] 
+         * @param {string} [productType] 
          * @param {string} [search] 
          * @param {string} [sort] 
          * @param {string} [order] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getProductsApiV1BuyersProductsGet(page?: number, perPage?: number, priceMin?: number, priceMax?: number, category?: string, search?: string, sort?: string, order?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProductListResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getProductsApiV1BuyersProductsGet(page, perPage, priceMin, priceMax, category, search, sort, order, options);
+        async getProductsApiV1BuyersProductsGet(page?: number, perPage?: number, priceMin?: number, priceMax?: number, productType?: string, search?: string, sort?: string, order?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProductListResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getProductsApiV1BuyersProductsGet(page, perPage, priceMin, priceMax, productType, search, sort, order, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['BuyersApi.getProductsApiV1BuyersProductsGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -1655,15 +1673,15 @@ export const BuyersApiFactory = function (configuration?: Configuration, basePat
          * @param {number} [perPage] 
          * @param {number} [priceMin] 
          * @param {number} [priceMax] 
-         * @param {string} [category] 
+         * @param {string} [productType] 
          * @param {string} [search] 
          * @param {string} [sort] 
          * @param {string} [order] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getProductsApiV1BuyersProductsGet(page?: number, perPage?: number, priceMin?: number, priceMax?: number, category?: string, search?: string, sort?: string, order?: string, options?: RawAxiosRequestConfig): AxiosPromise<ProductListResponse> {
-            return localVarFp.getProductsApiV1BuyersProductsGet(page, perPage, priceMin, priceMax, category, search, sort, order, options).then((request) => request(axios, basePath));
+        getProductsApiV1BuyersProductsGet(page?: number, perPage?: number, priceMin?: number, priceMax?: number, productType?: string, search?: string, sort?: string, order?: string, options?: RawAxiosRequestConfig): AxiosPromise<ProductListResponse> {
+            return localVarFp.getProductsApiV1BuyersProductsGet(page, perPage, priceMin, priceMax, productType, search, sort, order, options).then((request) => request(axios, basePath));
         },
         /**
          * Remove item from cart
@@ -1784,7 +1802,7 @@ export class BuyersApi extends BaseAPI {
      * @param {number} [perPage] 
      * @param {number} [priceMin] 
      * @param {number} [priceMax] 
-     * @param {string} [category] 
+     * @param {string} [productType] 
      * @param {string} [search] 
      * @param {string} [sort] 
      * @param {string} [order] 
@@ -1792,8 +1810,8 @@ export class BuyersApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof BuyersApi
      */
-    public getProductsApiV1BuyersProductsGet(page?: number, perPage?: number, priceMin?: number, priceMax?: number, category?: string, search?: string, sort?: string, order?: string, options?: RawAxiosRequestConfig) {
-        return BuyersApiFp(this.configuration).getProductsApiV1BuyersProductsGet(page, perPage, priceMin, priceMax, category, search, sort, order, options).then((request) => request(this.axios, this.basePath));
+    public getProductsApiV1BuyersProductsGet(page?: number, perPage?: number, priceMin?: number, priceMax?: number, productType?: string, search?: string, sort?: string, order?: string, options?: RawAxiosRequestConfig) {
+        return BuyersApiFp(this.configuration).getProductsApiV1BuyersProductsGet(page, perPage, priceMin, priceMax, productType, search, sort, order, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1972,13 +1990,13 @@ export const ProductsApiAxiosParamCreator = function (configuration?: Configurat
          * @param {number} [elements] 
          * @param {number} [priceMin] 
          * @param {number} [priceMax] 
-         * @param {string} [category] 
+         * @param {string} [productType] 
          * @param {string} [sort] 
          * @param {string} [search] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getProductsApiV1ProductsGet: async (page?: number, elements?: number, priceMin?: number, priceMax?: number, category?: string, sort?: string, search?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getProductsApiV1ProductsGet: async (page?: number, elements?: number, priceMin?: number, priceMax?: number, productType?: string, sort?: string, search?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v1/products/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2007,8 +2025,8 @@ export const ProductsApiAxiosParamCreator = function (configuration?: Configurat
                 localVarQueryParameter['price_max'] = priceMax;
             }
 
-            if (category !== undefined) {
-                localVarQueryParameter['category'] = category;
+            if (productType !== undefined) {
+                localVarQueryParameter['product_type'] = productType;
             }
 
             if (sort !== undefined) {
@@ -2060,14 +2078,14 @@ export const ProductsApiFp = function(configuration?: Configuration) {
          * @param {number} [elements] 
          * @param {number} [priceMin] 
          * @param {number} [priceMax] 
-         * @param {string} [category] 
+         * @param {string} [productType] 
          * @param {string} [sort] 
          * @param {string} [search] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getProductsApiV1ProductsGet(page?: number, elements?: number, priceMin?: number, priceMax?: number, category?: string, sort?: string, search?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProductListResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getProductsApiV1ProductsGet(page, elements, priceMin, priceMax, category, sort, search, options);
+        async getProductsApiV1ProductsGet(page?: number, elements?: number, priceMin?: number, priceMax?: number, productType?: string, sort?: string, search?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProductListResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getProductsApiV1ProductsGet(page, elements, priceMin, priceMax, productType, sort, search, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ProductsApi.getProductsApiV1ProductsGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -2099,14 +2117,14 @@ export const ProductsApiFactory = function (configuration?: Configuration, baseP
          * @param {number} [elements] 
          * @param {number} [priceMin] 
          * @param {number} [priceMax] 
-         * @param {string} [category] 
+         * @param {string} [productType] 
          * @param {string} [sort] 
          * @param {string} [search] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getProductsApiV1ProductsGet(page?: number, elements?: number, priceMin?: number, priceMax?: number, category?: string, sort?: string, search?: string, options?: RawAxiosRequestConfig): AxiosPromise<ProductListResponse> {
-            return localVarFp.getProductsApiV1ProductsGet(page, elements, priceMin, priceMax, category, sort, search, options).then((request) => request(axios, basePath));
+        getProductsApiV1ProductsGet(page?: number, elements?: number, priceMin?: number, priceMax?: number, productType?: string, sort?: string, search?: string, options?: RawAxiosRequestConfig): AxiosPromise<ProductListResponse> {
+            return localVarFp.getProductsApiV1ProductsGet(page, elements, priceMin, priceMax, productType, sort, search, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2137,15 +2155,15 @@ export class ProductsApi extends BaseAPI {
      * @param {number} [elements] 
      * @param {number} [priceMin] 
      * @param {number} [priceMax] 
-     * @param {string} [category] 
+     * @param {string} [productType] 
      * @param {string} [sort] 
      * @param {string} [search] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ProductsApi
      */
-    public getProductsApiV1ProductsGet(page?: number, elements?: number, priceMin?: number, priceMax?: number, category?: string, sort?: string, search?: string, options?: RawAxiosRequestConfig) {
-        return ProductsApiFp(this.configuration).getProductsApiV1ProductsGet(page, elements, priceMin, priceMax, category, sort, search, options).then((request) => request(this.axios, this.basePath));
+    public getProductsApiV1ProductsGet(page?: number, elements?: number, priceMin?: number, priceMax?: number, productType?: string, sort?: string, search?: string, options?: RawAxiosRequestConfig) {
+        return ProductsApiFp(this.configuration).getProductsApiV1ProductsGet(page, elements, priceMin, priceMax, productType, sort, search, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

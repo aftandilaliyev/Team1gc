@@ -6,9 +6,9 @@ version_type=$1
 version=$(npm version $version_type --no-git-tag-version)
 
 # Commit changes
-git add .
-git commit -m "Update SDK to version $version"
+# git add .
+# git commit -m "Update SDK to version $version"
 
 # Push changes
-git push
+# git push
 npm publish

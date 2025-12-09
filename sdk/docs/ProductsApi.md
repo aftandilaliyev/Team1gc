@@ -79,7 +79,7 @@ let page: number; // (optional) (default to 1)
 let elements: number; // (optional) (default to 20)
 let priceMin: number; // (optional) (default to undefined)
 let priceMax: number; // (optional) (default to undefined)
-let category: string; // (optional) (default to undefined)
+let productType: string; // (optional) (default to undefined)
 let sort: string; // (optional) (default to 'created_at')
 let search: string; // (optional) (default to undefined)
 
@@ -88,7 +88,7 @@ const { status, data } = await apiInstance.getProductsApiV1ProductsGet(
     elements,
     priceMin,
     priceMax,
-    category,
+    productType,
     sort,
     search
 );
@@ -102,7 +102,7 @@ const { status, data } = await apiInstance.getProductsApiV1ProductsGet(
 | **elements** | [**number**] |  | (optional) defaults to 20|
 | **priceMin** | [**number**] |  | (optional) defaults to undefined|
 | **priceMax** | [**number**] |  | (optional) defaults to undefined|
-| **category** | [**string**] |  | (optional) defaults to undefined|
+| **productType** | [**string**] |  | (optional) defaults to undefined|
 | **sort** | [**string**] |  | (optional) defaults to 'created_at'|
 | **search** | [**string**] |  | (optional) defaults to undefined|
 

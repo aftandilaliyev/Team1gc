@@ -1,0 +1,34 @@
+{
+  "dependencies": {
+    "@openapitools/openapi-generator-cli": "^2.23.4",
+    "openapi-generator-cli": "^1.0.0"
+  },
+  "name": "@rasadov/team-gc-sdk",
+  "version": "1.0.1",
+  "description": "Team GC API SDK",
+  "main": "dist/index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "axios": "^1.12.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "api",
+    "sdk",
+    "team-gc",
+    "typescript"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "Rauf Asadov",
+  "license": "ISC"
+}
