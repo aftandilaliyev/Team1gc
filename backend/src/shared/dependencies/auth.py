@@ -16,7 +16,7 @@ def get_auth_service(
     return AuthService(session)
 
 
-async def get_current_user(
+def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     auth_service: AuthService = Depends(get_auth_service)
 ) -> User:

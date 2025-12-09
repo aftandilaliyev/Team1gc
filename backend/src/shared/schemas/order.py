@@ -1,8 +1,10 @@
 from datetime import datetime
 from enum import StrEnum
 from typing import List, Optional
-from uuid import UUID
 from pydantic import BaseModel, Field
+
+from src.shared.schemas.product import ProductBase
+# from src.shared.schemas.product import ProductBase
 
 
 class OrderStatus(StrEnum):
@@ -14,7 +16,7 @@ class OrderStatus(StrEnum):
 
 
 class CartItemBase(BaseModel):
-    product_id: UUID
+    product_id: str
     quantity: int = Field(..., gt=0)
 
 
@@ -27,18 +29,27 @@ class CartItemUpdate(BaseModel):
 
 
 class CartItemResponse(CartItemBase):
-    id: UUID
-    user_id: UUID
+    id: str
+    user_id: int
+    
+    class Config:
+        from_attributes = True
+
+class CartItemWithProductResponse(CartItemBase):
+    id: str
+    user_id: int
+    product: ProductBase | None = None
     
     class Config:
         from_attributes = True
 
 
 class OrderItemResponse(BaseModel):
-    id: UUID
-    product_id: UUID
+    id: str
+    product_id: str
     quantity: int
     price_at_time: float
+    product: ProductBase | None = None
     
     class Config:
         from_attributes = True
@@ -61,10 +72,10 @@ class OrderUpdate(BaseModel):
 
 
 class OrderResponse(OrderBase):
-    id: UUID
-    user_id: UUID
+    id: str
+    user_id: int
     total_amount: float
-    shipping_address: str
+    shipping_address: Optional[str] = None
     billing_address: Optional[str] = None
     created_at: datetime
     updated_at: datetime
@@ -83,13 +94,14 @@ class OrderListResponse(BaseModel):
 
 
 class CheckoutRequest(BaseModel):
-    shipping_address: str
-    billing_address: Optional[str] = None
-    payment_method: str = "dodo_payments"
+    pass
+    # shipping_address: str
+    # billing_address: Optional[str] = None
+    # payment_method: str = "dodo_payments"
 
 
 class CheckoutResponse(BaseModel):
-    order_id: UUID
+    order_id: str
     payment_url: Optional[str] = None
     total_amount: float
     status: str

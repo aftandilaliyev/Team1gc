@@ -1,19 +1,17 @@
 from typing import TYPE_CHECKING
 from datetime import datetime
 from enum import Enum
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
-from passlib.context import CryptContext
+import bcrypt
 
 from src.infrastructure.database import Base
 
 if TYPE_CHECKING:
     from .payments import Customer
     from .product import Product
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 class UserRole(Enum):
     BUYER = "buyer"
@@ -29,16 +27,16 @@ class User(Base):
         index=True
     )
     email: Mapped[str] = mapped_column(
-        unique=True, index=True, nullable=False
+        String(255), unique=True, index=True, nullable=False
     )
     username: Mapped[str] = mapped_column(
-        unique=True, index=True, nullable=False
+        String(100), unique=True, index=True, nullable=False
     )
-    hashed_password: Mapped[str] = mapped_column(nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(
         server_default='1', default=True
     )
-    role: Mapped[str] = mapped_column(server_default=UserRole.BUYER.value)
+    role: Mapped[str] = mapped_column(String(50), server_default=UserRole.BUYER.value)
     created_at: Mapped[datetime] = mapped_column(
         server_default=func.now(), nullable=False
     )
@@ -48,7 +46,22 @@ class User(Base):
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify a password against its hash using bcrypt"""
+    # Bcrypt has a 72-byte limit, so truncate if necessary
+    password_bytes = plain_password.encode('utf-8')
+    if len(password_bytes) > 72:
+        password_bytes = password_bytes[:72]
+    
+    return bcrypt.checkpw(password_bytes, hashed_password.encode('utf-8'))
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    """Hash a password using bcrypt"""
+    # Bcrypt has a 72-byte limit, so truncate if necessary
+    password_bytes = password.encode('utf-8')
+    if len(password_bytes) > 72:
+        password_bytes = password_bytes[:72]
+    
+    # Generate salt and hash the password
+    salt = bcrypt.gensalt(rounds=12)
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    return hashed.decode('utf-8')
