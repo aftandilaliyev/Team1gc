@@ -20,7 +20,7 @@ export default function OrdersPage() {
     }
 
     try {
-      const response = await client.buyerApi.getOrders();
+      const response = await client.buyerApi.getOrdersApiV1BuyersOrdersGet();
       setOrders(response.data);
     } catch (err) {
       setError('Failed to load orders');
@@ -32,7 +32,7 @@ export default function OrdersPage() {
 
   const fetchOrderDetails = async (orderId) => {
     try {
-      const response = await client.buyerApi.getOrder(orderId);
+      const response = await client.buyerApi.getOrderApiV1BuyersOrdersOrderIdGet(orderId);
       setSelectedOrder(response.data);
     } catch (err) {
       alert('Failed to load order details');
@@ -140,15 +140,13 @@ export default function OrdersPage() {
                       <div>
                         <h4 className="font-medium text-gray-900 mb-2">Shipping Address</h4>
                         <p className="text-sm text-gray-600">
-                          {order.shipping_address.street}<br />
-                          {order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.zip_code}<br />
-                          {order.shipping_address.country}
+                          {order.shipping_address || 'No shipping address provided'}
                         </p>
                       </div>
                       <div>
                         <h4 className="font-medium text-gray-900 mb-2">Payment Method</h4>
                         <p className="text-sm text-gray-600 capitalize">
-                          {order.payment_method.replace('_', ' ')}
+                          {order.payment_method ? order.payment_method.replace('_', ' ') : 'Dodo Payments'}
                         </p>
                       </div>
                     </div>
@@ -161,23 +159,15 @@ export default function OrdersPage() {
                         {order.items.map((item) => (
                           <div key={item.id} className="flex items-center space-x-4">
                             <div className="flex-shrink-0">
-                              {item.product.image_url ? (
-                                <img
-                                  src={item.product.image_url}
-                                  alt={item.product.name}
-                                  className="h-16 w-16 object-cover rounded-md"
-                                />
-                              ) : (
-                                <div className="h-16 w-16 bg-gray-300 rounded-md flex items-center justify-center">
-                                  <span className="text-gray-500 text-xs">No Image</span>
-                                </div>
-                              )}
+                              <div className="h-16 w-16 bg-gray-300 rounded-md flex items-center justify-center">
+                                <span className="text-gray-500 text-xs">Product</span>
+                              </div>
                             </div>
                             <div className="flex-1">
-                              <h5 className="font-medium text-gray-900">{item.product.name}</h5>
+                              <h5 className="font-medium text-gray-900">Product: {item?.product?.name}</h5>
                               <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                               <p className="text-sm font-semibold text-indigo-600">
-                                {formatPrice(item.price)} each
+                                {formatPrice(item.price_at_time)} each
                               </p>
                             </div>
                           </div>
@@ -238,8 +228,8 @@ export default function OrdersPage() {
                       <h4 className="font-medium mb-2">Items:</h4>
                       {selectedOrder.items.map((item) => (
                         <div key={item.id} className="border-b pb-2 mb-2 last:border-b-0">
-                          <p><strong>{item.product.name}</strong></p>
-                          <p>Quantity: {item.quantity} × {formatPrice(item.price)}</p>
+                          <p><strong>Product: {item?.product?.name || `Product ${item.product_id}`}</strong></p>
+                          <p>Quantity: {item.quantity} × {formatPrice(item.price_at_time)}</p>
                         </div>
                       ))}
                     </div>

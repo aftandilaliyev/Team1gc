@@ -24,7 +24,7 @@ export default function Dashboard() {
         router.push('/catalog');
         break;
       case 'supplier':
-        router.push('/supplier/dashboard'); // Future implementation
+        router.push('/supplier/dashboard');
         break;
       default:
         router.push('/catalog');
