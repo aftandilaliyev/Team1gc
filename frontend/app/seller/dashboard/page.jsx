@@ -35,9 +35,9 @@ export default function SellerDashboard() {
 
     try {
       const [productsRes, ordersRes, analyticsRes] = await Promise.all([
-        client.sellerApi.getSellerProducts(),
-        client.sellerApi.getSellerOrders(),
-        client.sellerApi.getSellerAnalytics()
+        client.sellerApi.getSellerProductsApiV1SellersProductsGet(),
+        client.sellerApi.getSellerOrdersApiV1SellersOrdersGet(),
+        client.sellerApi.getSellerAnalyticsApiV1SellersAnalyticsGet()
       ]);
       
       setProducts(productsRes.data.products || []);
@@ -59,9 +59,9 @@ export default function SellerDashboard() {
     e.preventDefault();
     try {
       if (editingProduct) {
-        await client.sellerApi.updateProduct(editingProduct.id, productForm);
+        await client.sellerApi.updateProductApiV1SellersProductsProductIdPut(editingProduct.id, productForm);
       } else {
-        await client.sellerApi.createProduct(productForm);
+        await client.sellerApi.createProductApiV1SellersProductsPost(productForm);
       }
       
       setShowProductForm(false);
@@ -98,7 +98,7 @@ export default function SellerDashboard() {
     if (!confirm('Are you sure you want to delete this product?')) return;
     
     try {
-      await client.sellerApi.deleteProduct(productId);
+      await client.sellerApi.deleteProductApiV1SellersProductsProductIdDelete(productId);
       await fetchSellerData();
     } catch (err) {
       alert('Failed to delete product');
@@ -108,7 +108,7 @@ export default function SellerDashboard() {
 
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
     try {
-      await client.sellerApi.updateOrderStatus(orderId, { status: newStatus });
+      await client.sellerApi.updateOrderStatusApiV1SellersOrdersOrderIdPut(orderId, { status: newStatus });
       await fetchSellerData();
     } catch (err) {
       alert('Failed to update order status');
@@ -184,7 +184,7 @@ export default function SellerDashboard() {
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'products'
                   ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-600'
               }`}
             >
               Products
@@ -194,7 +194,7 @@ export default function SellerDashboard() {
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'orders'
                   ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-600'
               }`}
             >
               Orders
@@ -381,7 +381,7 @@ export default function SellerDashboard() {
                       required
                       value={productForm.name}
                       onChange={(e) => setProductForm({...productForm, name: e.target.value})}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      className="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     />
                   </div>
                   <div>
@@ -391,7 +391,7 @@ export default function SellerDashboard() {
                       rows={3}
                       value={productForm.description}
                       onChange={(e) => setProductForm({...productForm, description: e.target.value})}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      className="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -403,7 +403,7 @@ export default function SellerDashboard() {
                         required
                         value={productForm.price}
                         onChange={(e) => setProductForm({...productForm, price: e.target.value})}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                       />
                     </div>
                     <div>
@@ -413,7 +413,7 @@ export default function SellerDashboard() {
                         required
                         value={productForm.stock_quantity}
                         onChange={(e) => setProductForm({...productForm, stock_quantity: e.target.value})}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                       />
                     </div>
                   </div>
@@ -423,7 +423,7 @@ export default function SellerDashboard() {
                       type="url"
                       value={productForm.image_url}
                       onChange={(e) => setProductForm({...productForm, image_url: e.target.value})}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      className="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     />
                   </div>
                   <div className="flex justify-end space-x-3 pt-4">
@@ -433,7 +433,7 @@ export default function SellerDashboard() {
                         setShowProductForm(false);
                         setEditingProduct(null);
                       }}
-                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                      className="px-4 py-2 border border-gray-600 rounded-md text-gray-700 hover:bg-gray-50"
                     >
                       Cancel
                     </button>
