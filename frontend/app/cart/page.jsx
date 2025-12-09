@@ -20,7 +20,7 @@ export default function CartPage() {
     }
 
     try {
-      const response = await client.buyerApi.getCart();
+      const response = await client.buyerApi.getCartApiV1BuyersCartGet();
       setCartItems(response.data);
     } catch (err) {
       setError('Failed to load cart');
@@ -38,7 +38,7 @@ export default function CartPage() {
     if (newQuantity < 1) return;
 
     try {
-      await client.buyerApi.updateCartItem(itemId, { quantity: newQuantity });
+      await client.buyerApi.updateCartItemApiV1BuyersCartItemIdPut(itemId, { quantity: newQuantity });
       await fetchCart(); // Refresh cart
     } catch (err) {
       alert('Failed to update quantity');
@@ -48,7 +48,7 @@ export default function CartPage() {
 
   const removeItem = async (itemId) => {
     try {
-      await client.buyerApi.removeFromCart(itemId);
+      await client.buyerApi.removeFromCartApiV1BuyersCartItemIdDelete(itemId);
       await fetchCart(); // Refresh cart
     } catch (err) {
       alert('Failed to remove item');
@@ -60,7 +60,7 @@ export default function CartPage() {
     if (!confirm('Are you sure you want to clear your cart?')) return;
 
     try {
-      await client.buyerApi.clearCart();
+      await client.buyerApi.clearCartApiV1BuyersCartDelete();
       setCartItems([]);
     } catch (err) {
       alert('Failed to clear cart');
@@ -84,9 +84,9 @@ export default function CartPage() {
         payment_method: 'credit_card'
       };
 
-      const response = await client.buyerApi.checkout(checkoutData);
+      const response = await client.buyerApi.checkoutApiV1BuyersCheckoutPost(checkoutData);
       alert('Order placed successfully!');
-      router.push('/orders');
+      router.push(response.data.payment_url);
     } catch (err) {
       alert('Checkout failed. Please try again.');
       console.error(err);
@@ -103,7 +103,7 @@ export default function CartPage() {
   };
 
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+    return cartItems.reduce((total, item) => total + (item.product?.price * item?.quantity), 0);
   };
 
   if (loading) {
@@ -158,10 +158,10 @@ export default function CartPage() {
                   <div key={item.id} className="p-6 border-b border-gray-200 last:border-b-0">
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
-                        {item.product.image_url ? (
+                        {item?.product?.image_url ? (
                           <img
-                            src={item.product.image_url}
-                            alt={item.product.name}
+                            src={item.product?.image_url}
+                            alt={item.product?.name}
                             className="h-20 w-20 object-cover rounded-md"
                           />
                         ) : (
@@ -171,21 +171,21 @@ export default function CartPage() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-medium text-gray-900">{item.product.name}</h3>
-                        <p className="text-sm text-gray-600 mt-1">{item.product.description}</p>
+                        <h3 className="text-lg font-medium text-gray-900">{item.product?.name}</h3>
+                        <p className="text-sm text-gray-600 mt-1">{item.product?.description}</p>
                         <p className="text-lg font-semibold text-indigo-600 mt-2">
-                          {formatPrice(item.product.price)}
+                          {formatPrice(item.product?.price)}
                         </p>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <div className="flex items-center border border-gray-300 rounded-md">
+                        <div className="flex items-center border border-gray-600 rounded-md">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
                             className="px-3 py-1 text-gray-600 hover:text-gray-800"
                           >
                             -
                           </button>
-                          <span className="px-3 py-1 border-l border-r border-gray-300">
+                          <span className="px-3 py-1 border-l border-r border-gray-600">
                             {item.quantity}
                           </span>
                           <button
@@ -207,7 +207,7 @@ export default function CartPage() {
                     </div>
                     <div className="mt-4 text-right">
                       <span className="text-lg font-semibold">
-                        Subtotal: {formatPrice(item.product.price * item.quantity)}
+                        Subtotal: {formatPrice(item.product?.price * item?.quantity)}
                       </span>
                     </div>
                   </div>
