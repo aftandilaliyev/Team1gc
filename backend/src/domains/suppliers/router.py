@@ -1,5 +1,4 @@
 from typing import List
-from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
@@ -38,7 +37,7 @@ def get_all_orders(
 
 @router.get("/orders/{order_id}", response_model=OrderResponse)
 def get_order(
-    order_id: UUID,
+    order_id: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -49,7 +48,7 @@ def get_order(
 
 @router.post("/orders/{order_id}/approve", response_model=OrderResponse)
 def approve_order(
-    order_id: UUID,
+    order_id: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -60,7 +59,7 @@ def approve_order(
 
 @router.put("/orders/{order_id}", response_model=OrderResponse)
 def update_order_status(
-    order_id: UUID,
+    order_id: str,
     status_update: OrderUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)

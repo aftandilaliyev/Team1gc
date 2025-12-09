@@ -1,13 +1,12 @@
-from datetime import datetime, timedelta
-from typing import Optional, Dict, Any, List
-from uuid import UUID
+from typing import Optional
+
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, desc, asc
+from sqlalchemy import and_, or_, desc
 from fastapi import HTTPException, status
 
 from src.shared.models.product import Product, ProductImage
 from src.shared.schemas.product import (
-    ProductCreate, ProductUpdate, ProductResponse, ProductListResponse, ProductQueryParams
+    ProductCreate, ProductUpdate, ProductResponse, ProductListResponse
 )
 
 
@@ -21,7 +20,7 @@ class ProductService:
         elements: int = 20,
         price_min: Optional[float] = None,
         price_max: Optional[float] = None,
-        category: Optional[UUID] = None,
+        product_type: Optional[str] = None,
         sort: str = "created_at",
         search: Optional[str] = None
     ) -> ProductListResponse:
@@ -35,8 +34,8 @@ class ProductService:
         if price_max is not None:
             query = query.filter(Product.price <= price_max)
         
-        if category:
-            query = query.filter(Product.type_id == category)
+        if product_type:
+            query = query.filter(Product.product_type == product_type)
         
         if search:
             search_term = f"%{search}%"
@@ -69,7 +68,7 @@ class ProductService:
             total_pages=total_pages
         )
 
-    def get_product_by_id(self, product_id: UUID) -> ProductResponse:
+    def get_product_by_id(self, product_id: str) -> ProductResponse:
         """Get a single product by ID"""
         product = self.session.query(Product).filter(Product.id == product_id).first()
         
@@ -89,7 +88,8 @@ class ProductService:
             name=create_product_schema.name,
             price=create_product_schema.price,
             description=create_product_schema.description,
-            type_id=create_product_schema.type_id
+            product_type=create_product_schema.product_type,
+            stock_quantity=create_product_schema.stock_quantity
         )
         
         self.session.add(product)
@@ -108,7 +108,7 @@ class ProductService:
         
         return ProductResponse.model_validate(product)
 
-    def update_product(self, product_id: UUID, seller_id: int, update_product_schema: ProductUpdate) -> ProductResponse:
+    def update_product(self, product_id: str, seller_id: int, update_product_schema: ProductUpdate) -> ProductResponse:
         """Update an existing product"""
         product = self.session.query(Product).filter(
             and_(
@@ -133,15 +133,18 @@ class ProductService:
         if update_product_schema.description is not None:
             product.description = update_product_schema.description
         
-        if update_product_schema.type_id is not None:
-            product.type_id = update_product_schema.type_id
+        if update_product_schema.product_type is not None:
+            product.product_type = update_product_schema.product_type
+        
+        if update_product_schema.stock_quantity is not None:
+            product.stock_quantity = update_product_schema.stock_quantity
         
         self.session.commit()
         self.session.refresh(product)
         
         return ProductResponse.model_validate(product)
 
-    def delete_product(self, product_id: UUID, seller_id: int) -> None:
+    def delete_product(self, product_id: str, seller_id: int) -> None:
         """Delete a product"""
         product = self.session.query(Product).filter(
             and_(

@@ -9,7 +9,7 @@ router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 
 
 @router.post("/dodo-payments")
-async def handle_dodo_payment_webhook(
+def handle_dodo_payment_webhook(
     request: Request,
     webhook_data: WebhookRequest,
     x_signature: str = Header(..., alias="X-Signature"),
@@ -18,9 +18,9 @@ async def handle_dodo_payment_webhook(
     """Handle DodoPayments webhook events"""
     
     # Get raw request body for signature verification
-    body = await request.body()
+    body = request.body()
     
     service = WebhookService(db)
-    result = await service.handle_dodo_payment_webhook(body, x_signature, webhook_data)
+    result = service.handle_dodo_payment_webhook(body, x_signature, webhook_data)
     
     return result

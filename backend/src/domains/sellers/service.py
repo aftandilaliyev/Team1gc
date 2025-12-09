@@ -1,9 +1,11 @@
-from typing import List, Optional
 from uuid import UUID
+from typing import List, Optional
+
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, desc
 from fastapi import HTTPException, status
 
+from src.infrastructure.payments.dodo import DodoPaymentsService
 from src.shared.models.product import Product, ProductImage
 from src.shared.models.order import Order, OrderItem, OrderStatus
 from src.shared.models.user import User, UserRole
@@ -16,6 +18,7 @@ from src.shared.schemas.order import OrderResponse, OrderUpdate
 class SellerService:
     def __init__(self, session: Session):
         self.session = session
+        self.dodo_payments = DodoPaymentsService()
 
     def _verify_seller_access(self, user_id: int, product_id: Optional[UUID] = None) -> User:
         """Verify user is a seller and has access to the product if specified"""
@@ -49,6 +52,14 @@ class SellerService:
         
         return user
 
+    def _sync_with_payment_provider(self, product: Product):
+        """Sync product with payment provider"""
+        if not product.dodo_product_id:
+            dodo_product_id = self.dodo_payments.sync_product_with_dodo(
+                product=product
+            )
+            product.dodo_product_id = dodo_product_id
+
     def create_product(self, user_id: int, product_data: ProductCreate) -> ProductResponse:
         """Create a new product"""
         self._verify_seller_access(user_id)
@@ -59,12 +70,15 @@ class SellerService:
             name=product_data.name,
             price=product_data.price,
             description=product_data.description,
-            type_id=product_data.type_id
+            product_type=product_data.product_type,
+            stock_quantity=product_data.stock_quantity
         )
-        
+
         self.session.add(product)
         self.session.flush()  # Get product ID
-        
+
+        self._sync_with_payment_provider(product)
+
         # Add images if provided
         for image_data in product_data.images:
             image = ProductImage(
@@ -136,8 +150,11 @@ class SellerService:
         if update_data.description is not None:
             product.description = update_data.description
         
-        if update_data.type_id is not None:
-            product.type_id = update_data.type_id
+        if update_data.product_type is not None:
+            product.product_type = update_data.product_type
+        
+        if update_data.stock_quantity is not None:
+            product.stock_quantity = update_data.stock_quantity
         
         self.session.commit()
         self.session.refresh(product)

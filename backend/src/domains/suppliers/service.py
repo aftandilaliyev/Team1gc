@@ -1,6 +1,6 @@
 from typing import List
 from uuid import UUID
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, desc
 from fastapi import HTTPException, status
 
@@ -40,15 +40,17 @@ class SupplierService:
             Order.status == OrderStatus.CONFIRMED.value
         ).order_by(desc(Order.created_at)).offset((page - 1) * per_page).limit(per_page).all()
         
-        return [OrderResponse.model_validate(order) for order in orders]
+        return orders
 
     def get_all_orders(self, user_id: int, page: int = 1, per_page: int = 20) -> List[OrderResponse]:
         """Get all orders (suppliers can view all orders)"""
         self._verify_supplier_access(user_id)
         
-        orders = self.session.query(Order).order_by(desc(Order.created_at)).offset((page - 1) * per_page).limit(per_page).all()
+        orders = self.session.query(Order).options(
+            joinedload(Order.items).options(joinedload(OrderItem.product))
+        ).order_by(desc(Order.created_at)).offset((page - 1) * per_page).limit(per_page).all()
         
-        return [OrderResponse.model_validate(order) for order in orders]
+        return orders
 
     def get_order_by_id(self, user_id: int, order_id: UUID) -> OrderResponse:
         """Get specific order details"""
@@ -62,7 +64,7 @@ class SupplierService:
                 detail="Order not found"
             )
         
-        return OrderResponse.model_validate(order)
+        return order
 
     def approve_order(self, user_id: int, order_id: UUID) -> OrderResponse:
         """Approve an order (move from confirmed to shipped)"""
@@ -89,7 +91,7 @@ class SupplierService:
         self.session.commit()
         self.session.refresh(order)
         
-        return OrderResponse.model_validate(order)
+        return order
 
     def update_order_status(self, user_id: int, order_id: UUID, status_update: OrderUpdate) -> OrderResponse:
         """Update order status (suppliers have broader permissions)"""
@@ -146,7 +148,7 @@ class SupplierService:
         self.session.commit()
         self.session.refresh(order)
         
-        return OrderResponse.model_validate(order)
+        return order
 
     def get_supplier_analytics(self, user_id: int) -> dict:
         """Get analytics for supplier dashboard"""

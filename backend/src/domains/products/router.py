@@ -1,4 +1,3 @@
-from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
@@ -15,7 +14,7 @@ def get_products(
     elements: int = Query(20, ge=1, le=100),
     price_min: float = Query(None, ge=0),
     price_max: float = Query(None, ge=0),
-    category: UUID = Query(None),
+    product_type: str = Query(None),
     sort: str = Query("created_at"),
     search: str = Query(None),
     db: Session = Depends(get_db)
@@ -27,7 +26,7 @@ def get_products(
         elements=elements,
         price_min=price_min,
         price_max=price_max,
-        category=category,
+        product_type=product_type,
         sort=sort,
         search=search
     )
@@ -35,7 +34,7 @@ def get_products(
 
 @router.get("/{product_id}", response_model=ProductResponse)
 def get_product(
-    product_id: UUID,
+    product_id: str,
     db: Session = Depends(get_db)
 ):
     """Get a single product by ID"""

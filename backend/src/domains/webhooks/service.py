@@ -13,7 +13,7 @@ class WebhookService:
         self.session = session
         self.dodo_payments = DodoPaymentsService()
 
-    async def handle_dodo_payment_webhook(
+    def handle_dodo_payment_webhook(
         self, 
         payload: bytes, 
         signature: str, 
@@ -61,21 +61,34 @@ class WebhookService:
         
         # Handle different event types
         if event_type == "payment.succeeded":
-            return await self._handle_payment_succeeded(order, data)
+            return self._handle_payment_succeeded(order, data)
         elif event_type == "payment.failed":
-            return await self._handle_payment_failed(order, data)
+            return self._handle_payment_failed(order, data)
         elif event_type == "payment.refunded":
-            return await self._handle_payment_refunded(order, data)
+            return self._handle_payment_refunded(order, data)
         else:
             # Unknown event type, just log and return success
             return {"status": "ignored", "reason": f"Unknown event type: {event_type}"}
 
-    async def _handle_payment_succeeded(self, order: Order, data: Any) -> Dict[str, Any]:
-        """Handle successful payment"""
+    def _handle_payment_succeeded(self, order: Order, data: Any) -> Dict[str, Any]:
+        """Handle successful payment and update order with address information"""
         
         # Update order status to confirmed if it's still pending
         if order.status == OrderStatus.PENDING.value:
             order.status = OrderStatus.CONFIRMED.value
+            
+            # Update addresses from DodoPayments data
+            if hasattr(data, 'billing_address') and data.billing_address:
+                billing_addr = data.billing_address
+                order.billing_address = self._format_address(billing_addr)
+            
+            if hasattr(data, 'shipping_address') and data.shipping_address:
+                shipping_addr = data.shipping_address
+                order.shipping_address = self._format_address(shipping_addr)
+            elif hasattr(data, 'billing_address') and data.billing_address:
+                # Use billing address as shipping address if no separate shipping address
+                order.shipping_address = order.billing_address
+            
             self.session.commit()
             
             return {
@@ -89,7 +102,7 @@ class WebhookService:
             "reason": f"Order already in status: {order.status}"
         }
 
-    async def _handle_payment_failed(self, order: Order, data: Any) -> Dict[str, Any]:
+    def _handle_payment_failed(self, order: Order, data: Any) -> Dict[str, Any]:
         """Handle failed payment"""
         
         # Update order status to cancelled if payment failed
@@ -108,7 +121,7 @@ class WebhookService:
             "reason": f"Order already in status: {order.status}"
         }
 
-    async def _handle_payment_refunded(self, order: Order, data: Any) -> Dict[str, Any]:
+    def _handle_payment_refunded(self, order: Order, data: Any) -> Dict[str, Any]:
         """Handle payment refund"""
         
         # Update order status to cancelled if refunded
@@ -126,3 +139,24 @@ class WebhookService:
             "status": "ignored",
             "reason": f"Order in status: {order.status}, cannot refund"
         }
+    
+    def _format_address(self, address) -> str:
+        """Format address object into a string"""
+        if not address:
+            return ""
+        
+        parts = []
+        if hasattr(address, 'line1') and address.line1:
+            parts.append(address.line1)
+        if hasattr(address, 'line2') and address.line2:
+            parts.append(address.line2)
+        if hasattr(address, 'city') and address.city:
+            parts.append(address.city)
+        if hasattr(address, 'state') and address.state:
+            parts.append(address.state)
+        if hasattr(address, 'postal_code') and address.postal_code:
+            parts.append(address.postal_code)
+        if hasattr(address, 'country') and address.country:
+            parts.append(address.country)
+        
+        return ", ".join(parts)
