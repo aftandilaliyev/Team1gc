@@ -1,5 +1,4 @@
 from typing import List
-from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
@@ -8,7 +7,7 @@ from src.shared.dependencies.auth import get_current_user
 from src.shared.models.user import User
 from src.shared.schemas.product import ProductResponse, ProductListResponse, ProductQueryParams
 from src.shared.schemas.order import (
-    CartItemCreate, CartItemResponse, CartItemUpdate,
+    CartItemCreate, CartItemResponse, CartItemUpdate, CartItemWithProductResponse,
     CheckoutRequest, CheckoutResponse, OrderResponse
 )
 from .service import BuyerService
@@ -22,7 +21,7 @@ def get_products(
     per_page: int = Query(20, ge=1, le=100),
     price_min: float = Query(None, ge=0),
     price_max: float = Query(None, ge=0),
-    category: UUID = Query(None),
+    product_type: str = Query(None),
     search: str = Query(None),
     sort: str = Query("created_at"),
     order: str = Query("desc"),
@@ -34,7 +33,7 @@ def get_products(
         per_page=per_page,
         price_min=price_min,
         price_max=price_max,
-        category=category,
+        product_type=product_type,
         search=search,
         sort=sort,
         order=order
@@ -46,7 +45,7 @@ def get_products(
 
 @router.get("/products/{product_id}", response_model=ProductResponse)
 def get_product(
-    product_id: UUID,
+    product_id: str,
     db: Session = Depends(get_db)
 ):
     """Get a single product by ID"""
@@ -54,7 +53,7 @@ def get_product(
     return service.get_product_by_id(product_id)
 
 
-@router.post("/cart", response_model=CartItemResponse)
+@router.post("/cart")
 def add_to_cart(
     item_data: CartItemCreate,
     current_user: User = Depends(get_current_user),
@@ -65,7 +64,7 @@ def add_to_cart(
     return service.add_to_cart(current_user.id, item_data)
 
 
-@router.get("/cart", response_model=List[CartItemResponse])
+@router.get("/cart", response_model=List[CartItemWithProductResponse])
 def get_cart(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -77,7 +76,7 @@ def get_cart(
 
 @router.put("/cart/{item_id}", response_model=CartItemResponse)
 def update_cart_item(
-    item_id: UUID,
+    item_id: str,
     update_data: CartItemUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -89,7 +88,7 @@ def update_cart_item(
 
 @router.delete("/cart/{item_id}")
 def remove_from_cart(
-    item_id: UUID,
+    item_id: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -111,14 +110,14 @@ def clear_cart(
 
 
 @router.post("/checkout", response_model=CheckoutResponse)
-async def checkout(
+def checkout(
     checkout_data: CheckoutRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Process checkout and create order"""
     service = BuyerService(db)
-    return await service.checkout(current_user.id, checkout_data)
+    return service.checkout(current_user.id, checkout_data)
 
 
 @router.get("/orders", response_model=List[OrderResponse])
@@ -133,7 +132,7 @@ def get_orders(
 
 @router.get("/orders/{order_id}", response_model=OrderResponse)
 def get_order(
-    order_id: UUID,
+    order_id: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):

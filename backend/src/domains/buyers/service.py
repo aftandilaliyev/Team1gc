@@ -1,7 +1,8 @@
 from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
-from sqlalchemy.orm import Session
+from loguru import logger
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, or_, desc, asc
 from fastapi import HTTPException, status
 
@@ -33,8 +34,8 @@ class BuyerService:
         if params.price_max is not None:
             query = query.filter(Product.price <= params.price_max)
         
-        if params.category:
-            query = query.filter(Product.type_id == params.category)
+        if params.product_type:
+            query = query.filter(Product.product_type == params.product_type)
         
         if params.search:
             search_term = f"%{params.search}%"
@@ -87,6 +88,7 @@ class BuyerService:
         # Check if product exists
         product = self.session.query(Product).filter(Product.id == item_data.product_id).first()
         if not product:
+            print("Product id: ", item_data.product_id, " not found")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Product not found"
@@ -120,18 +122,17 @@ class BuyerService:
 
     def get_cart(self, user_id: int) -> List[CartItemResponse]:
         """Get user's cart items"""
-        cart_items = self.session.query(CartItem).filter(CartItem.user_id == user_id).all()
-        return [CartItemResponse.model_validate(item) for item in cart_items]
+        cart_items = self.session.query(CartItem).filter(CartItem.user_id == user_id).options(joinedload(CartItem.product)).all()
+        return cart_items
 
     def update_cart_item(self, user_id: int, item_id: UUID, update_data: CartItemUpdate) -> CartItemResponse:
         """Update cart item quantity"""
-        cart_item = self.session.query(CartItem).filter(
-            and_(
-                CartItem.id == item_id,
-                CartItem.user_id == user_id
-            )
+        logger.info(f"Updating cart item {item_id} for user {user_id} with quantity {update_data.quantity}")
+        cart_item = self.session.query(CartItem).where(
+            CartItem.id == item_id,
+            CartItem.user_id == user_id
         ).first()
-        
+        logger.info(f"Found cart item: {cart_item}")
         if not cart_item:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -166,8 +167,8 @@ class BuyerService:
         self.session.query(CartItem).filter(CartItem.user_id == user_id).delete()
         self.session.commit()
 
-    async def checkout(self, user_id: int, checkout_data: CheckoutRequest) -> CheckoutResponse:
-        """Process checkout and create order with payment"""
+    def checkout(self, user_id: int, checkout_data: CheckoutRequest) -> CheckoutResponse:
+        """Process checkout and create order with payment session"""
         # Get user
         user = self.session.query(User).filter(User.id == user_id).first()
         if not user:
@@ -184,28 +185,43 @@ class BuyerService:
                 detail="Cart is empty"
             )
         
-        # Calculate total amount
+        # Calculate total amount and prepare cart items for DodoPayments
         total_amount = Decimal('0')
         order_items_data = []
+        dodo_cart_items = []
         
         for cart_item in cart_items:
             product = cart_item.product
             item_total = product.price * cart_item.quantity
             total_amount += item_total
             
+            # Ensure product is synced with DodoPayments
+            if not product.dodo_product_id:
+                dodo_product_id = self.dodo_payments.sync_product_with_dodo(
+                    product=product
+                )
+                product.dodo_product_id = dodo_product_id
+                self.session.flush()  # Save the dodo_product_id
+            
             order_items_data.append({
                 'product_id': product.id,
                 'quantity': cart_item.quantity,
                 'price_at_time': product.price
             })
+            
+            dodo_cart_items.append({
+                'product_id': product.id,
+                'dodo_product_id': product.dodo_product_id,
+                'quantity': cart_item.quantity
+            })
         
-        # Create order
+        # Create order without addresses (will be updated via webhook)
         order = Order(
             user_id=user_id,
             status=OrderStatus.PENDING.value,
             total_amount=total_amount,
-            shipping_address=checkout_data.shipping_address,
-            billing_address=checkout_data.billing_address or checkout_data.shipping_address
+            shipping_address="",  # Will be filled from DodoPayments
+            billing_address=""    # Will be filled from DodoPayments
         )
         
         self.session.add(order)
@@ -224,7 +240,7 @@ class BuyerService:
         
         if not customer:
             # Create customer in DodoPayments
-            dodo_customer = await self.dodo_payments.create_customer(
+            dodo_customer = self.dodo_payments.create_customer(
                 email=user.email,
                 name=user.username,
                 user_id=user_id
@@ -233,18 +249,20 @@ class BuyerService:
             # Save customer locally
             customer = Customer(
                 user_id=user_id,
-                customer_id=dodo_customer['id'],
+                customer_id=dodo_customer.customer_id,
                 billing_email=user.email,
                 billing_name=user.username
             )
             self.session.add(customer)
         
-        # Create payment intent
-        payment_intent = await self.dodo_payments.create_payment_intent(
-            amount=total_amount,
+        # Create checkout session with proper SDK parameters
+        payment_intent = self.dodo_payments.create_checkout_session(
+            cart_items=dodo_cart_items,
+            customer_email=user.email,
+            customer_name=user.username,
+            user_id=user_id,
             order_id=order.id,
-            customer_email=customer.billing_email,
-            customer_name=customer.billing_name,
+            existing_customer_id=customer.customer_id if customer else None,
             metadata={
                 'user_id': str(user_id),
                 'order_id': str(order.id)
@@ -258,19 +276,23 @@ class BuyerService:
         
         return CheckoutResponse(
             order_id=order.id,
-            payment_url=payment_intent.get('checkout_url'),
+            payment_url=payment_intent.checkout_url,
             total_amount=float(total_amount),
             status="payment_pending"
         )
 
     def get_orders(self, user_id: int) -> List[OrderResponse]:
         """Get user's order history"""
-        orders = self.session.query(Order).filter(Order.user_id == user_id).order_by(desc(Order.created_at)).all()
-        return [OrderResponse.model_validate(order) for order in orders]
+        orders = self.session.query(Order).filter(Order.user_id == user_id).options(joinedload(Order.items).options(joinedload(OrderItem.product))).order_by(desc(Order.created_at)).all()
+        return orders
 
     def get_order_by_id(self, user_id: int, order_id: UUID) -> OrderResponse:
         """Get specific order by ID"""
-        order = self.session.query(Order).filter(
+        order = self.session.query(Order).options(
+            joinedload(Order.items
+        ).options(
+            joinedload(OrderItem.product))
+        ).filter(
             and_(
                 Order.id == order_id,
                 Order.user_id == user_id
@@ -283,4 +305,4 @@ class BuyerService:
                 detail="Order not found"
             )
         
-        return OrderResponse.model_validate(order)
+        return order
