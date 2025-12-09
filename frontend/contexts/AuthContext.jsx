@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { client } from '../lib/api.jsx';
+import { sdk, client } from '../lib/api.jsx';
 
 const AuthContext = createContext();
 
@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
 
     if (token && userData) {
       // Set token in SDK
-      client.authApi.apiClient.setToken(token);
+      sdk.setToken(token);
       setUser(JSON.parse(userData));
     }
     setLoading(false);
@@ -24,7 +24,7 @@ export function AuthProvider({ children }) {
   const login = (token, userData) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
-    client.authApi.apiClient.setToken(token);
+    sdk.setToken(token);
     setUser(userData);
   };
 
