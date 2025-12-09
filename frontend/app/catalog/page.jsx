@@ -22,17 +22,17 @@ export default function CatalogPage() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (filters.search) params.append('search', filters.search);
-      if (filters.price_min) params.append('price_min', filters.price_min);
-      if (filters.price_max) params.append('price_max', filters.price_max);
-      params.append('sort', filters.sort);
-      params.append('page', filters.page);
-      params.append('elements', '12');
-
-      const response = await client.productsApi.getProducts(params);
+      const response = await client.productsApi.getProductsApiV1ProductsGet(
+        filters.page,
+        12, // elements
+        filters.price_min ? parseFloat(filters.price_min) : undefined,
+        filters.price_max ? parseFloat(filters.price_max) : undefined,
+        undefined, // productType
+        filters.sort,
+        filters.search || undefined
+      );
       setProducts(response.data.products);
-      setPagination(response.data.pagination);
+      setPagination(response.data);
     } catch (err) {
       setError('Failed to load products');
       console.error(err);
@@ -61,7 +61,7 @@ export default function CatalogPage() {
     }
 
     try {
-      await client.buyerApi.addToCart({
+      await client.buyerApi.addToCartApiV1BuyersCartPost({
         product_id: productId,
         quantity: 1
       });
@@ -108,7 +108,7 @@ export default function CatalogPage() {
                 value={filters.search}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
                 placeholder="Search products..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
             <div>
@@ -120,7 +120,7 @@ export default function CatalogPage() {
                 value={filters.price_min}
                 onChange={(e) => handleFilterChange('price_min', e.target.value)}
                 placeholder="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
             <div>
@@ -132,7 +132,7 @@ export default function CatalogPage() {
                 value={filters.price_max}
                 onChange={(e) => handleFilterChange('price_max', e.target.value)}
                 placeholder="1000"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
             <div>
@@ -142,7 +142,7 @@ export default function CatalogPage() {
               <select
                 value={filters.sort}
                 onChange={(e) => handleFilterChange('sort', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="created_at">Newest</option>
                 <option value="price">Price: Low to High</option>
@@ -212,7 +212,7 @@ export default function CatalogPage() {
               <button
                 onClick={() => handleFilterChange('page', Math.max(1, filters.page - 1))}
                 disabled={filters.page === 1}
-                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-600 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous
               </button>
@@ -222,7 +222,7 @@ export default function CatalogPage() {
               <button
                 onClick={() => handleFilterChange('page', Math.min(pagination.total_pages, filters.page + 1))}
                 disabled={filters.page === pagination.total_pages}
-                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-600 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
