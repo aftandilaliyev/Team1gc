@@ -22,4 +22,5 @@ dependencies = [
     "pytest-asyncio>=0.21.0",
     "dodopayments>=1.61.6",
     "boto3>=1.42.2",
+    "cryptography>=46.0.3",
 ]
