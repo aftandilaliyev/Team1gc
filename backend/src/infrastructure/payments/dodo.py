@@ -1,8 +1,14 @@
+from math import prod
 import dodopayments
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from decimal import Decimal
 from uuid import UUID
 
+from dodopayments.types import AttachExistingCustomerParam, CheckoutSessionResponse, Customer, NewCustomerParam, TaxCategory, Currency, Product as DodoProduct
+from dodopayments.types.payment import ProductCart
+from dodopayments.types.price_param import OneTimePrice
+
+from src.shared.models.product import Product
 from src.shared.config.cfg import settings
 
 
@@ -14,44 +20,83 @@ class DodoPaymentsService:
         self.webhook_secret = getattr(settings, 'DODO_PAYMENTS_WEBHOOK_SECRET', '')
         
         # Initialize DodoPayments client
-        self.client = dodopayments.DodoPayments(api_key=self.api_key)
-    
-    async def create_payment_intent(
+        self.client = dodopayments.DodoPayments(bearer_token=self.api_key, environment="test_mode")
+
+    def create_checkout_session(
         self,
-        amount: Decimal,
-        order_id: UUID,
+        cart_items: List[Dict[str, Any]],
         customer_email: str,
         customer_name: str,
-        currency: str = 'USD',
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """Create a payment intent with DodoPayments"""
+        user_id: int,
+        order_id: UUID,
+        existing_customer_id: Optional[str] = None,
+        metadata: Optional[Dict[str, str]] = None
+    ) -> CheckoutSessionResponse:
+        """Create a checkout session with proper SDK classes"""
         
-        payment_data = {
-            'amount': int(amount * 100),  # Convert to cents
-            'currency': currency,
-            'customer_email': customer_email,
-            'customer_name': customer_name,
-            'metadata': {
-                'order_id': str(order_id),
-                **(metadata or {})
-            },
-            'success_url': f"{settings.FRONTEND_URL}/checkout/success?order_id={order_id}",
-            'cancel_url': f"{settings.FRONTEND_URL}/checkout/cancel?order_id={order_id}",
-            'webhook_url': f"{settings.BACKEND_URL}/api/webhooks/dodo-payments"
+        # Create product cart items
+        product_cart = []
+        for item in cart_items:
+            if not item.get('dodo_product_id'):
+                raise ValueError(f"Product {item['product_id']} not synced with DodoPayments")
+            
+            # Use proper OneTimeProductCartItemParam structure
+            product_cart.append(
+                ProductCart(
+                    product_id=item['dodo_product_id'],
+                    quantity=item['quantity']
+                )
+            )
+        
+        # Create customer parameter based on whether customer exists
+        if existing_customer_id:
+            # Use AttachExistingCustomerParam
+            customer_param = AttachExistingCustomerParam(customer_id=existing_customer_id)
+        else:
+            # Use NewCustomerParam
+            customer_param = NewCustomerParam(
+                email=customer_email,
+                name=customer_name,
+                metadata={
+                    'user_id': str(user_id)
+                }
+            )
+
+        # Prepare metadata
+        final_metadata = {
+            'order_id': str(order_id),
+            'user_id': str(user_id),
+            **(metadata or {})
         }
         
-        return self.client.payments.create(**payment_data)
+        try:
+            return self.client.checkout_sessions.create(
+                customer=customer_param,
+                product_cart=product_cart,
+                metadata=final_metadata,
+                return_url=f"{settings.FRONTEND_URL}/checkout/success?order_id={order_id}",
+            )
+        except Exception:
+            # Fallback to simpler structure if the above fails
+            return self.client.payments.create(
+                customer_email=customer_email,
+                customer_name=customer_name,
+                product_cart=product_cart,
+                metadata=final_metadata,
+                return_url=f"{settings.FRONTEND_URL}/checkout/success?order_id={order_id}",
+                collect_billing_address=True,
+                collect_shipping_address=True
+            )
     
-    async def get_payment_intent(self, payment_intent_id: str) -> Dict[str, Any]:
+    def get_payment_intent(self, payment_intent_id: str) -> Dict[str, Any]:
         """Get payment intent details"""
         return self.client.payments.retrieve(payment_intent_id)
     
-    async def confirm_payment(self, payment_intent_id: str) -> Dict[str, Any]:
+    def confirm_payment(self, payment_intent_id: str) -> Dict[str, Any]:
         """Confirm a payment intent"""
         return self.client.payments.confirm(payment_intent_id)
     
-    async def refund_payment(
+    def refund_payment(
         self,
         payment_intent_id: str,
         amount: Optional[Decimal] = None,
@@ -84,7 +129,7 @@ class DodoPaymentsService:
             
             return hmac.compare_digest(f"sha256={expected_signature}", signature)
     
-    async def create_customer(self, email: str, name: str, user_id: int) -> Dict[str, Any]:
+    def create_customer(self, email: str, name: str, user_id: int) -> Customer:
         """Create a customer in DodoPayments"""
         
         customer_data = {
@@ -97,6 +142,52 @@ class DodoPaymentsService:
         
         return self.client.customers.create(**customer_data)
     
-    async def get_customer(self, customer_id: str) -> Dict[str, Any]:
+    def get_customer(self, customer_id: str) -> Dict[str, Any]:
         """Get customer details"""
         return self.client.customers.retrieve(customer_id)
+    
+    def create_product_in_dodo(
+        self,
+        name: str,
+        price: Decimal,
+        description: str = "",
+        metadata: Optional[Dict[str, str]] = None
+    ):
+        """Create a product in DodoPayments"""
+        # Create proper price object for DodoPayments
+        price_obj = OneTimePrice(
+            price=int(price * 100),  # Convert to cents
+            discount=0,
+            currency="USD",
+            pay_what_you_want=False,
+            type="one_time_price",
+            purchasing_power_parity=False,
+            tax_inclusive=False
+        )
+        
+        return self.client.products.create(
+            name=name,
+            price=price_obj,
+            tax_category="digital_products",
+            description=description,
+            metadata=metadata or {}
+        )
+    
+    def sync_product_with_dodo(
+        self,
+        product: Product
+    ) -> str:
+        """Sync a product with DodoPayments and return the dodo_product_id"""
+        
+        metadata = {
+            'local_product_id': product.id
+        }
+
+        dodo_product: DodoProduct = self.create_product_in_dodo(
+            name=product.name,
+            price=product.price,  # create_product_in_dodo handles cents conversion
+            description=product.description,
+            metadata=metadata
+        )
+
+        return dodo_product.product_id
