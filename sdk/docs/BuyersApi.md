@@ -16,7 +16,7 @@ All URIs are relative to *http://localhost*
 |[**updateCartItemApiV1BuyersCartItemIdPut**](#updatecartitemapiv1buyerscartitemidput) | **PUT** /api/v1/buyers/cart/{item_id} | Update Cart Item|
 
 # **addToCartApiV1BuyersCartPost**
-> CartItemResponse addToCartApiV1BuyersCartPost(cartItemCreate)
+> any addToCartApiV1BuyersCartPost(cartItemCreate)
 
 Add item to cart
 
@@ -48,7 +48,7 @@ const { status, data } = await apiInstance.addToCartApiV1BuyersCartPost(
 
 ### Return type
 
-**CartItemResponse**
+**any**
 
 ### Authorization
 
@@ -69,7 +69,7 @@ const { status, data } = await apiInstance.addToCartApiV1BuyersCartPost(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **checkoutApiV1BuyersCheckoutPost**
-> CheckoutResponse checkoutApiV1BuyersCheckoutPost(checkoutRequest)
+> CheckoutResponse checkoutApiV1BuyersCheckoutPost(body)
 
 Process checkout and create order
 
@@ -78,17 +78,16 @@ Process checkout and create order
 ```typescript
 import {
     BuyersApi,
-    Configuration,
-    CheckoutRequest
+    Configuration
 } from './api';
 
 const configuration = new Configuration();
 const apiInstance = new BuyersApi(configuration);
 
-let checkoutRequest: CheckoutRequest; //
+let body: object; //
 
 const { status, data } = await apiInstance.checkoutApiV1BuyersCheckoutPost(
-    checkoutRequest
+    body
 );
 ```
 
@@ -96,7 +95,7 @@ const { status, data } = await apiInstance.checkoutApiV1BuyersCheckoutPost(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **checkoutRequest** | **CheckoutRequest**|  | |
+| **body** | **object**|  | |
 
 
 ### Return type
@@ -166,7 +165,7 @@ This endpoint does not have any parameters.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getCartApiV1BuyersCartGet**
-> Array<CartItemResponse> getCartApiV1BuyersCartGet()
+> Array<CartItemWithProductResponse> getCartApiV1BuyersCartGet()
 
 Get user\'s cart items
 
@@ -190,7 +189,7 @@ This endpoint does not have any parameters.
 
 ### Return type
 
-**Array<CartItemResponse>**
+**Array<CartItemWithProductResponse>**
 
 ### Authorization
 

@@ -1,26 +1,26 @@
-# OrderItemResponse
+# CartItemWithProductResponse
 
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **string** |  | [default to undefined]
 **product_id** | **string** |  | [default to undefined]
 **quantity** | **number** |  | [default to undefined]
-**price_at_time** | **number** |  | [default to undefined]
+**id** | **string** |  | [default to undefined]
+**user_id** | **number** |  | [default to undefined]
 **product** | [**ProductBase**](ProductBase.md) |  | [optional] [default to undefined]
 
 ## Example
 
 ```typescript
-import { OrderItemResponse } from './api';
+import { CartItemWithProductResponse } from './api';
 
-const instance: OrderItemResponse = {
-    id,
+const instance: CartItemWithProductResponse = {
     product_id,
     quantity,
-    price_at_time,
+    id,
+    user_id,
     product,
 };
 ```

@@ -7,9 +7,9 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **status** | [**OrderStatus**](OrderStatus.md) |  | [optional] [default to undefined]
 **id** | **string** |  | [default to undefined]
-**user_id** | **string** |  | [default to undefined]
+**user_id** | **number** |  | [default to undefined]
 **total_amount** | **number** |  | [default to undefined]
-**shipping_address** | **string** |  | [default to undefined]
+**shipping_address** | **string** |  | [optional] [default to undefined]
 **billing_address** | **string** |  | [optional] [default to undefined]
 **created_at** | **string** |  | [default to undefined]
 **updated_at** | **string** |  | [default to undefined]

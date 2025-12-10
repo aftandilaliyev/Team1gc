@@ -61,7 +61,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **loginAuthLoginPost**
-> { [key: string]: any; } loginAuthLoginPost(userLogin)
+> AuthResponse loginAuthLoginPost(userLogin)
 
 Login with username and password to get access token.
 
@@ -93,7 +93,7 @@ const { status, data } = await apiInstance.loginAuthLoginPost(
 
 ### Return type
 
-**{ [key: string]: any; }**
+**AuthResponse**
 
 ### Authorization
 

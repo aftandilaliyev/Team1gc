@@ -4,12 +4,14 @@ api.ts
 base.ts
 common.ts
 configuration.ts
+docs/Address.md
+docs/AuthResponse.md
 docs/AuthenticationApi.md
 docs/BuyersApi.md
 docs/CartItemCreate.md
 docs/CartItemResponse.md
 docs/CartItemUpdate.md
-docs/CheckoutRequest.md
+docs/CartItemWithProductResponse.md
 docs/CheckoutResponse.md
 docs/Customer.md
 docs/DefaultApi.md
@@ -21,6 +23,7 @@ docs/OrderUpdate.md
 docs/PaymentMetadata.md
 docs/Price.md
 docs/Price1.md
+docs/ProductBase.md
 docs/ProductCreate.md
 docs/ProductImageCreate.md
 docs/ProductImageResponse.md
@@ -30,6 +33,7 @@ docs/ProductUpdate.md
 docs/ProductsApi.md
 docs/SellersApi.md
 docs/SuppliersApi.md
+docs/UploadsApi.md
 docs/UserCreate.md
 docs/UserLogin.md
 docs/UserResponse.md

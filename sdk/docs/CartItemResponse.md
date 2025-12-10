@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **product_id** | **string** |  | [default to undefined]
 **quantity** | **number** |  | [default to undefined]
 **id** | **string** |  | [default to undefined]
-**user_id** | **string** |  | [default to undefined]
+**user_id** | **number** |  | [default to undefined]
 
 ## Example
 

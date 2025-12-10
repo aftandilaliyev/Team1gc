@@ -5,12 +5,17 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**subscription_id** | **string** |  | [default to undefined]
+**subscription_id** | **string** |  | [optional] [default to undefined]
 **status** | **string** |  | [default to undefined]
-**product_id** | **string** |  | [default to undefined]
+**product_id** | **string** |  | [optional] [default to undefined]
 **customer** | [**Customer**](Customer.md) |  | [default to undefined]
 **metadata** | [**PaymentMetadata**](PaymentMetadata.md) |  | [optional] [default to undefined]
-**next_billing_date** | **string** |  | [default to undefined]
+**next_billing_date** | **string** |  | [optional] [default to undefined]
+**billing_address** | [**Address**](Address.md) |  | [optional] [default to undefined]
+**shipping_address** | [**Address**](Address.md) |  | [optional] [default to undefined]
+**payment_intent_id** | **string** |  | [optional] [default to undefined]
+**amount** | **number** |  | [optional] [default to undefined]
+**currency** | **string** |  | [optional] [default to undefined]
 
 ## Example
 
@@ -24,6 +29,11 @@ const instance: WebhookData = {
     customer,
     metadata,
     next_billing_date,
+    billing_address,
+    shipping_address,
+    payment_intent_id,
+    amount,
+    currency,
 };
 ```
 

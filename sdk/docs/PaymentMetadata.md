@@ -5,8 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**company_id** | **string** |  | [default to undefined]
-**user_id** | **string** |  | [default to undefined]
+**company_id** | **string** |  | [optional] [default to undefined]
+**user_id** | **number** |  | [optional] [default to undefined]
+**order_id** | **string** |  | [optional] [default to undefined]
 
 ## Example
 
@@ -16,6 +17,7 @@ import { PaymentMetadata } from './api';
 const instance: PaymentMetadata = {
     company_id,
     user_id,
+    order_id,
 };
 ```
 

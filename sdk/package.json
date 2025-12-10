@@ -4,7 +4,7 @@
     "openapi-generator-cli": "^1.0.0"
   },
   "name": "@rasadov/team-gc-sdk",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Team GC API SDK",
   "main": "dist/index.js",
   "directories": {

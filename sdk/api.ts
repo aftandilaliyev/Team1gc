@@ -26,6 +26,68 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerM
 /**
  * 
  * @export
+ * @interface Address
+ */
+export interface Address {
+    /**
+     * 
+     * @type {string}
+     * @memberof Address
+     */
+    'line1'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Address
+     */
+    'line2'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Address
+     */
+    'city'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Address
+     */
+    'state'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Address
+     */
+    'postal_code'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Address
+     */
+    'country'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface AuthResponse
+ */
+export interface AuthResponse {
+    /**
+     * 
+     * @type {UserResponse}
+     * @memberof AuthResponse
+     */
+    'user': UserResponse;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuthResponse
+     */
+    'access_token': string;
+}
+/**
+ * 
+ * @export
  * @interface CartItemCreate
  */
 export interface CartItemCreate {
@@ -68,10 +130,10 @@ export interface CartItemResponse {
     'id': string;
     /**
      * 
-     * @type {string}
+     * @type {number}
      * @memberof CartItemResponse
      */
-    'user_id': string;
+    'user_id': number;
 }
 /**
  * 
@@ -89,27 +151,39 @@ export interface CartItemUpdate {
 /**
  * 
  * @export
- * @interface CheckoutRequest
+ * @interface CartItemWithProductResponse
  */
-export interface CheckoutRequest {
+export interface CartItemWithProductResponse {
     /**
      * 
      * @type {string}
-     * @memberof CheckoutRequest
+     * @memberof CartItemWithProductResponse
      */
-    'shipping_address': string;
+    'product_id': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CartItemWithProductResponse
+     */
+    'quantity': number;
     /**
      * 
      * @type {string}
-     * @memberof CheckoutRequest
+     * @memberof CartItemWithProductResponse
      */
-    'billing_address'?: string | null;
+    'id': string;
     /**
      * 
-     * @type {string}
-     * @memberof CheckoutRequest
+     * @type {number}
+     * @memberof CartItemWithProductResponse
      */
-    'payment_method'?: string;
+    'user_id': number;
+    /**
+     * 
+     * @type {ProductBase}
+     * @memberof CartItemWithProductResponse
+     */
+    'product'?: ProductBase | null;
 }
 /**
  * 
@@ -210,6 +284,12 @@ export interface OrderItemResponse {
      * @memberof OrderItemResponse
      */
     'price_at_time': number;
+    /**
+     * 
+     * @type {ProductBase}
+     * @memberof OrderItemResponse
+     */
+    'product'?: ProductBase | null;
 }
 /**
  * 
@@ -231,10 +311,10 @@ export interface OrderResponse {
     'id': string;
     /**
      * 
-     * @type {string}
+     * @type {number}
      * @memberof OrderResponse
      */
-    'user_id': string;
+    'user_id': number;
     /**
      * 
      * @type {number}
@@ -246,7 +326,7 @@ export interface OrderResponse {
      * @type {string}
      * @memberof OrderResponse
      */
-    'shipping_address': string;
+    'shipping_address'?: string | null;
     /**
      * 
      * @type {string}
@@ -329,13 +409,19 @@ export interface PaymentMetadata {
      * @type {string}
      * @memberof PaymentMetadata
      */
-    'company_id': string;
+    'company_id'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof PaymentMetadata
+     */
+    'user_id'?: number | null;
     /**
      * 
      * @type {string}
      * @memberof PaymentMetadata
      */
-    'user_id': string;
+    'order_id'?: string | null;
 }
 /**
  * 
@@ -350,6 +436,37 @@ export interface Price {
  * @interface Price1
  */
 export interface Price1 {
+}
+/**
+ * 
+ * @export
+ * @interface ProductBase
+ */
+export interface ProductBase {
+    /**
+     * 
+     * @type {string}
+     * @memberof ProductBase
+     */
+    'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProductBase
+     */
+    'price': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProductBase
+     */
+    'description'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProductBase
+     */
+    'stock_quantity'?: number;
 }
 /**
  * 
@@ -728,7 +845,7 @@ export interface WebhookData {
      * @type {string}
      * @memberof WebhookData
      */
-    'subscription_id': string;
+    'subscription_id'?: string | null;
     /**
      * 
      * @type {string}
@@ -740,7 +857,7 @@ export interface WebhookData {
      * @type {string}
      * @memberof WebhookData
      */
-    'product_id': string;
+    'product_id'?: string | null;
     /**
      * 
      * @type {Customer}
@@ -758,7 +875,37 @@ export interface WebhookData {
      * @type {string}
      * @memberof WebhookData
      */
-    'next_billing_date': string;
+    'next_billing_date'?: string | null;
+    /**
+     * 
+     * @type {Address}
+     * @memberof WebhookData
+     */
+    'billing_address'?: Address | null;
+    /**
+     * 
+     * @type {Address}
+     * @memberof WebhookData
+     */
+    'shipping_address'?: Address | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof WebhookData
+     */
+    'payment_intent_id'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof WebhookData
+     */
+    'amount'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof WebhookData
+     */
+    'currency'?: string | null;
 }
 /**
  * 
@@ -924,7 +1071,7 @@ export const AuthenticationApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async loginAuthLoginPost(userLogin: UserLogin, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+        async loginAuthLoginPost(userLogin: UserLogin, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AuthResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.loginAuthLoginPost(userLogin, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AuthenticationApi.loginAuthLoginPost']?.[localVarOperationServerIndex]?.url;
@@ -970,7 +1117,7 @@ export const AuthenticationApiFactory = function (configuration?: Configuration,
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        loginAuthLoginPost(userLogin: UserLogin, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+        loginAuthLoginPost(userLogin: UserLogin, options?: RawAxiosRequestConfig): AxiosPromise<AuthResponse> {
             return localVarFp.loginAuthLoginPost(userLogin, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1081,13 +1228,13 @@ export const BuyersApiAxiosParamCreator = function (configuration?: Configuratio
         /**
          * Process checkout and create order
          * @summary Checkout
-         * @param {CheckoutRequest} checkoutRequest 
+         * @param {object} body 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        checkoutApiV1BuyersCheckoutPost: async (checkoutRequest: CheckoutRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'checkoutRequest' is not null or undefined
-            assertParamExists('checkoutApiV1BuyersCheckoutPost', 'checkoutRequest', checkoutRequest)
+        checkoutApiV1BuyersCheckoutPost: async (body: object, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'body' is not null or undefined
+            assertParamExists('checkoutApiV1BuyersCheckoutPost', 'body', body)
             const localVarPath = `/api/v1/buyers/checkout`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1111,7 +1258,7 @@ export const BuyersApiAxiosParamCreator = function (configuration?: Configuratio
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(checkoutRequest, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1461,7 +1608,7 @@ export const BuyersApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async addToCartApiV1BuyersCartPost(cartItemCreate: CartItemCreate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CartItemResponse>> {
+        async addToCartApiV1BuyersCartPost(cartItemCreate: CartItemCreate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.addToCartApiV1BuyersCartPost(cartItemCreate, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['BuyersApi.addToCartApiV1BuyersCartPost']?.[localVarOperationServerIndex]?.url;
@@ -1470,12 +1617,12 @@ export const BuyersApiFp = function(configuration?: Configuration) {
         /**
          * Process checkout and create order
          * @summary Checkout
-         * @param {CheckoutRequest} checkoutRequest 
+         * @param {object} body 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async checkoutApiV1BuyersCheckoutPost(checkoutRequest: CheckoutRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CheckoutResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.checkoutApiV1BuyersCheckoutPost(checkoutRequest, options);
+        async checkoutApiV1BuyersCheckoutPost(body: object, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CheckoutResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.checkoutApiV1BuyersCheckoutPost(body, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['BuyersApi.checkoutApiV1BuyersCheckoutPost']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -1498,7 +1645,7 @@ export const BuyersApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getCartApiV1BuyersCartGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CartItemResponse>>> {
+        async getCartApiV1BuyersCartGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CartItemWithProductResponse>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getCartApiV1BuyersCartGet(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['BuyersApi.getCartApiV1BuyersCartGet']?.[localVarOperationServerIndex]?.url;
@@ -1606,18 +1753,18 @@ export const BuyersApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        addToCartApiV1BuyersCartPost(cartItemCreate: CartItemCreate, options?: RawAxiosRequestConfig): AxiosPromise<CartItemResponse> {
+        addToCartApiV1BuyersCartPost(cartItemCreate: CartItemCreate, options?: RawAxiosRequestConfig): AxiosPromise<any> {
             return localVarFp.addToCartApiV1BuyersCartPost(cartItemCreate, options).then((request) => request(axios, basePath));
         },
         /**
          * Process checkout and create order
          * @summary Checkout
-         * @param {CheckoutRequest} checkoutRequest 
+         * @param {object} body 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        checkoutApiV1BuyersCheckoutPost(checkoutRequest: CheckoutRequest, options?: RawAxiosRequestConfig): AxiosPromise<CheckoutResponse> {
-            return localVarFp.checkoutApiV1BuyersCheckoutPost(checkoutRequest, options).then((request) => request(axios, basePath));
+        checkoutApiV1BuyersCheckoutPost(body: object, options?: RawAxiosRequestConfig): AxiosPromise<CheckoutResponse> {
+            return localVarFp.checkoutApiV1BuyersCheckoutPost(body, options).then((request) => request(axios, basePath));
         },
         /**
          * Clear all items from cart
@@ -1634,7 +1781,7 @@ export const BuyersApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getCartApiV1BuyersCartGet(options?: RawAxiosRequestConfig): AxiosPromise<Array<CartItemResponse>> {
+        getCartApiV1BuyersCartGet(options?: RawAxiosRequestConfig): AxiosPromise<Array<CartItemWithProductResponse>> {
             return localVarFp.getCartApiV1BuyersCartGet(options).then((request) => request(axios, basePath));
         },
         /**
@@ -1729,13 +1876,13 @@ export class BuyersApi extends BaseAPI {
     /**
      * Process checkout and create order
      * @summary Checkout
-     * @param {CheckoutRequest} checkoutRequest 
+     * @param {object} body 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof BuyersApi
      */
-    public checkoutApiV1BuyersCheckoutPost(checkoutRequest: CheckoutRequest, options?: RawAxiosRequestConfig) {
-        return BuyersApiFp(this.configuration).checkoutApiV1BuyersCheckoutPost(checkoutRequest, options).then((request) => request(this.axios, this.basePath));
+    public checkoutApiV1BuyersCheckoutPost(body: object, options?: RawAxiosRequestConfig) {
+        return BuyersApiFp(this.configuration).checkoutApiV1BuyersCheckoutPost(body, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -2216,6 +2363,80 @@ export const SellersApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
+         * Create a new product with image uploads
+         * @summary Create Product With Images
+         * @param {string} name 
+         * @param {number} price 
+         * @param {string | null} [description] 
+         * @param {number} [stockQuantity] 
+         * @param {string | null} [productType] 
+         * @param {Array<File>} [images] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createProductWithImagesApiV1SellersProductsWithImagesPost: async (name: string, price: number, description?: string | null, stockQuantity?: number, productType?: string | null, images?: Array<File>, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('createProductWithImagesApiV1SellersProductsWithImagesPost', 'name', name)
+            // verify required parameter 'price' is not null or undefined
+            assertParamExists('createProductWithImagesApiV1SellersProductsWithImagesPost', 'price', price)
+            const localVarPath = `/api/v1/sellers/products/with-images`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+            if (name !== undefined) { 
+                localVarFormParams.append('name', name as any);
+            }
+    
+            if (price !== undefined) { 
+                localVarFormParams.append('price', price as any);
+            }
+    
+            if (description !== undefined) { 
+                localVarFormParams.append('description', description as any);
+            }
+    
+            if (stockQuantity !== undefined) { 
+                localVarFormParams.append('stock_quantity', stockQuantity as any);
+            }
+    
+            if (productType !== undefined) { 
+                localVarFormParams.append('product_type', productType as any);
+            }
+                if (images) {
+                images.forEach((element) => {
+                    localVarFormParams.append('images', element as any);
+                })
+            }
+
+    
+    
+            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = localVarFormParams;
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Delete a product
          * @summary Delete Product
          * @param {string} productId 
@@ -2563,6 +2784,24 @@ export const SellersApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Create a new product with image uploads
+         * @summary Create Product With Images
+         * @param {string} name 
+         * @param {number} price 
+         * @param {string | null} [description] 
+         * @param {number} [stockQuantity] 
+         * @param {string | null} [productType] 
+         * @param {Array<File>} [images] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createProductWithImagesApiV1SellersProductsWithImagesPost(name: string, price: number, description?: string | null, stockQuantity?: number, productType?: string | null, images?: Array<File>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProductResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createProductWithImagesApiV1SellersProductsWithImagesPost(name, price, description, stockQuantity, productType, images, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SellersApi.createProductWithImagesApiV1SellersProductsWithImagesPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Delete a product
          * @summary Delete Product
          * @param {string} productId 
@@ -2690,6 +2929,21 @@ export const SellersApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.createProductApiV1SellersProductsPost(productCreate, options).then((request) => request(axios, basePath));
         },
         /**
+         * Create a new product with image uploads
+         * @summary Create Product With Images
+         * @param {string} name 
+         * @param {number} price 
+         * @param {string | null} [description] 
+         * @param {number} [stockQuantity] 
+         * @param {string | null} [productType] 
+         * @param {Array<File>} [images] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createProductWithImagesApiV1SellersProductsWithImagesPost(name: string, price: number, description?: string | null, stockQuantity?: number, productType?: string | null, images?: Array<File>, options?: RawAxiosRequestConfig): AxiosPromise<ProductResponse> {
+            return localVarFp.createProductWithImagesApiV1SellersProductsWithImagesPost(name, price, description, stockQuantity, productType, images, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Delete a product
          * @summary Delete Product
          * @param {string} productId 
@@ -2792,6 +3046,23 @@ export class SellersApi extends BaseAPI {
      */
     public createProductApiV1SellersProductsPost(productCreate: ProductCreate, options?: RawAxiosRequestConfig) {
         return SellersApiFp(this.configuration).createProductApiV1SellersProductsPost(productCreate, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a new product with image uploads
+     * @summary Create Product With Images
+     * @param {string} name 
+     * @param {number} price 
+     * @param {string | null} [description] 
+     * @param {number} [stockQuantity] 
+     * @param {string | null} [productType] 
+     * @param {Array<File>} [images] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SellersApi
+     */
+    public createProductWithImagesApiV1SellersProductsWithImagesPost(name: string, price: number, description?: string | null, stockQuantity?: number, productType?: string | null, images?: Array<File>, options?: RawAxiosRequestConfig) {
+        return SellersApiFp(this.configuration).createProductWithImagesApiV1SellersProductsWithImagesPost(name, price, description, stockQuantity, productType, images, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -3388,6 +3659,369 @@ export class SuppliersApi extends BaseAPI {
      */
     public updateOrderStatusApiV1SuppliersOrdersOrderIdPut(orderId: string, orderUpdate: OrderUpdate, options?: RawAxiosRequestConfig) {
         return SuppliersApiFp(this.configuration).updateOrderStatusApiV1SuppliersOrdersOrderIdPut(orderId, orderUpdate, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * UploadsApi - axios parameter creator
+ * @export
+ */
+export const UploadsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Delete an image from R2 bucket.
+         * @summary Delete Image
+         * @param {string} fileKey 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteImageApiV1UploadsImageFileKeyDelete: async (fileKey: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'fileKey' is not null or undefined
+            assertParamExists('deleteImageApiV1UploadsImageFileKeyDelete', 'fileKey', fileKey)
+            const localVarPath = `/api/v1/uploads/image/{file_key}`
+                .replace(`{${"file_key"}}`, encodeURIComponent(String(fileKey)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get public URL for an image.
+         * @summary Get Image Url
+         * @param {string} fileKey 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getImageUrlApiV1UploadsImageFileKeyUrlGet: async (fileKey: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'fileKey' is not null or undefined
+            assertParamExists('getImageUrlApiV1UploadsImageFileKeyUrlGet', 'fileKey', fileKey)
+            const localVarPath = `/api/v1/uploads/image/{file_key}/url`
+                .replace(`{${"file_key"}}`, encodeURIComponent(String(fileKey)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Upload a single image to R2 bucket.
+         * @summary Upload Image
+         * @param {File} file 
+         * @param {string} [path] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        uploadImageApiV1UploadsImagePost: async (file: File, path?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'file' is not null or undefined
+            assertParamExists('uploadImageApiV1UploadsImagePost', 'file', file)
+            const localVarPath = `/api/v1/uploads/image`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+            if (file !== undefined) { 
+                localVarFormParams.append('file', file as any);
+            }
+    
+            if (path !== undefined) { 
+                localVarFormParams.append('path', path as any);
+            }
+    
+    
+            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = localVarFormParams;
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Upload multiple images to R2 bucket.
+         * @summary Upload Multiple Images
+         * @param {Array<File>} files 
+         * @param {string} [path] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        uploadMultipleImagesApiV1UploadsImagesPost: async (files: Array<File>, path?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'files' is not null or undefined
+            assertParamExists('uploadMultipleImagesApiV1UploadsImagesPost', 'files', files)
+            const localVarPath = `/api/v1/uploads/images`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (files) {
+                files.forEach((element) => {
+                    localVarFormParams.append('files', element as any);
+                })
+            }
+
+    
+            if (path !== undefined) { 
+                localVarFormParams.append('path', path as any);
+            }
+    
+    
+            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = localVarFormParams;
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * UploadsApi - functional programming interface
+ * @export
+ */
+export const UploadsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = UploadsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Delete an image from R2 bucket.
+         * @summary Delete Image
+         * @param {string} fileKey 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteImageApiV1UploadsImageFileKeyDelete(fileKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteImageApiV1UploadsImageFileKeyDelete(fileKey, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UploadsApi.deleteImageApiV1UploadsImageFileKeyDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get public URL for an image.
+         * @summary Get Image Url
+         * @param {string} fileKey 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getImageUrlApiV1UploadsImageFileKeyUrlGet(fileKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getImageUrlApiV1UploadsImageFileKeyUrlGet(fileKey, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UploadsApi.getImageUrlApiV1UploadsImageFileKeyUrlGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Upload a single image to R2 bucket.
+         * @summary Upload Image
+         * @param {File} file 
+         * @param {string} [path] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async uploadImageApiV1UploadsImagePost(file: File, path?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.uploadImageApiV1UploadsImagePost(file, path, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UploadsApi.uploadImageApiV1UploadsImagePost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Upload multiple images to R2 bucket.
+         * @summary Upload Multiple Images
+         * @param {Array<File>} files 
+         * @param {string} [path] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async uploadMultipleImagesApiV1UploadsImagesPost(files: Array<File>, path?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.uploadMultipleImagesApiV1UploadsImagesPost(files, path, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UploadsApi.uploadMultipleImagesApiV1UploadsImagesPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * UploadsApi - factory interface
+ * @export
+ */
+export const UploadsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = UploadsApiFp(configuration)
+    return {
+        /**
+         * Delete an image from R2 bucket.
+         * @summary Delete Image
+         * @param {string} fileKey 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteImageApiV1UploadsImageFileKeyDelete(fileKey: string, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.deleteImageApiV1UploadsImageFileKeyDelete(fileKey, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get public URL for an image.
+         * @summary Get Image Url
+         * @param {string} fileKey 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getImageUrlApiV1UploadsImageFileKeyUrlGet(fileKey: string, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.getImageUrlApiV1UploadsImageFileKeyUrlGet(fileKey, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Upload a single image to R2 bucket.
+         * @summary Upload Image
+         * @param {File} file 
+         * @param {string} [path] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        uploadImageApiV1UploadsImagePost(file: File, path?: string, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.uploadImageApiV1UploadsImagePost(file, path, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Upload multiple images to R2 bucket.
+         * @summary Upload Multiple Images
+         * @param {Array<File>} files 
+         * @param {string} [path] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        uploadMultipleImagesApiV1UploadsImagesPost(files: Array<File>, path?: string, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.uploadMultipleImagesApiV1UploadsImagesPost(files, path, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * UploadsApi - object-oriented interface
+ * @export
+ * @class UploadsApi
+ * @extends {BaseAPI}
+ */
+export class UploadsApi extends BaseAPI {
+    /**
+     * Delete an image from R2 bucket.
+     * @summary Delete Image
+     * @param {string} fileKey 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UploadsApi
+     */
+    public deleteImageApiV1UploadsImageFileKeyDelete(fileKey: string, options?: RawAxiosRequestConfig) {
+        return UploadsApiFp(this.configuration).deleteImageApiV1UploadsImageFileKeyDelete(fileKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get public URL for an image.
+     * @summary Get Image Url
+     * @param {string} fileKey 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UploadsApi
+     */
+    public getImageUrlApiV1UploadsImageFileKeyUrlGet(fileKey: string, options?: RawAxiosRequestConfig) {
+        return UploadsApiFp(this.configuration).getImageUrlApiV1UploadsImageFileKeyUrlGet(fileKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Upload a single image to R2 bucket.
+     * @summary Upload Image
+     * @param {File} file 
+     * @param {string} [path] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UploadsApi
+     */
+    public uploadImageApiV1UploadsImagePost(file: File, path?: string, options?: RawAxiosRequestConfig) {
+        return UploadsApiFp(this.configuration).uploadImageApiV1UploadsImagePost(file, path, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Upload multiple images to R2 bucket.
+     * @summary Upload Multiple Images
+     * @param {Array<File>} files 
+     * @param {string} [path] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UploadsApi
+     */
+    public uploadMultipleImagesApiV1UploadsImagesPost(files: Array<File>, path?: string, options?: RawAxiosRequestConfig) {
+        return UploadsApiFp(this.configuration).uploadMultipleImagesApiV1UploadsImagesPost(files, path, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
