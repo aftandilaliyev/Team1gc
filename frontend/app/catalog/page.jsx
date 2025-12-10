@@ -166,7 +166,7 @@ export default function CatalogPage() {
               <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200">
                 {product.images.length > 0 ? (
                   <img
-                    src={product.images[0]}
+                    src={product.images[0]?.image_url}
                     alt={product.name}
                     className="h-48 w-full object-cover object-center"
                   />
