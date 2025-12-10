@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@rasadov/team-gc-sdk": "^1.0.1",
+    "@rasadov/team-gc-sdk": "^1.0.3",
     "axios": "^1.13.2",
     "next": "^16.0.8",
     "react": "19.2.0",
