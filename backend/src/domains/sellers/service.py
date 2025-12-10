@@ -1,4 +1,3 @@
-from uuid import UUID
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
@@ -20,7 +19,7 @@ class SellerService:
         self.session = session
         self.dodo_payments = DodoPaymentsService()
 
-    def _verify_seller_access(self, user_id: int, product_id: Optional[UUID] = None) -> User:
+    def _verify_seller_access(self, user_id: int, product_id: Optional[str] = None) -> User:
         """Verify user is a seller and has access to the product if specified"""
         user = self.session.query(User).filter(User.id == user_id).first()
         
@@ -116,7 +115,7 @@ class SellerService:
             total_pages=total_pages
         )
 
-    def get_product_by_id(self, user_id: int, product_id: UUID) -> ProductResponse:
+    def get_product_by_id(self, user_id: int, product_id: str) -> ProductResponse:
         """Get a specific product by ID (seller must own it)"""
         self._verify_seller_access(user_id, product_id)
         
@@ -129,7 +128,7 @@ class SellerService:
         
         return ProductResponse.model_validate(product)
 
-    def update_product(self, user_id: int, product_id: UUID, update_data: ProductUpdate) -> ProductResponse:
+    def update_product(self, user_id: int, product_id: str, update_data: ProductUpdate) -> ProductResponse:
         """Update a product"""
         self._verify_seller_access(user_id, product_id)
         
@@ -161,7 +160,7 @@ class SellerService:
         
         return ProductResponse.model_validate(product)
 
-    def delete_product(self, user_id: int, product_id: UUID) -> None:
+    def delete_product(self, user_id: int, product_id: str) -> None:
         """Delete a product"""
         self._verify_seller_access(user_id, product_id)
         
@@ -200,7 +199,7 @@ class SellerService:
         
         return [OrderResponse.model_validate(order) for order in orders]
 
-    def get_order_by_id(self, user_id: int, order_id: UUID) -> OrderResponse:
+    def get_order_by_id(self, user_id: int, order_id: str) -> OrderResponse:
         """Get specific order details (if it contains seller's products)"""
         self._verify_seller_access(user_id)
         
@@ -220,7 +219,7 @@ class SellerService:
         
         return OrderResponse.model_validate(order)
 
-    def update_order_status(self, user_id: int, order_id: UUID, status_update: OrderUpdate) -> OrderResponse:
+    def update_order_status(self, user_id: int, order_id: str, status_update: OrderUpdate) -> OrderResponse:
         """Update order status (seller can only approve/ship orders)"""
         self._verify_seller_access(user_id)
         

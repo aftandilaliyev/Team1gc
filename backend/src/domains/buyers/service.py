@@ -1,6 +1,5 @@
 from decimal import Decimal
-from typing import List, Optional
-from uuid import UUID
+from typing import List
 from loguru import logger
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, or_, desc, asc
@@ -71,7 +70,7 @@ class BuyerService:
             total_pages=total_pages
         )
 
-    def get_product_by_id(self, product_id: UUID) -> ProductResponse:
+    def get_product_by_id(self, product_id: str) -> ProductResponse:
         """Get a single product by ID"""
         product = self.session.query(Product).filter(Product.id == product_id).first()
         
@@ -125,7 +124,7 @@ class BuyerService:
         cart_items = self.session.query(CartItem).filter(CartItem.user_id == user_id).options(joinedload(CartItem.product)).all()
         return cart_items
 
-    def update_cart_item(self, user_id: int, item_id: UUID, update_data: CartItemUpdate) -> CartItemResponse:
+    def update_cart_item(self, user_id: int, item_id: str, update_data: CartItemUpdate) -> CartItemResponse:
         """Update cart item quantity"""
         logger.info(f"Updating cart item {item_id} for user {user_id} with quantity {update_data.quantity}")
         cart_item = self.session.query(CartItem).where(
@@ -144,7 +143,7 @@ class BuyerService:
         self.session.refresh(cart_item)
         return CartItemResponse.model_validate(cart_item)
 
-    def remove_from_cart(self, user_id: int, item_id: UUID) -> None:
+    def remove_from_cart(self, user_id: int, item_id: str) -> None:
         """Remove item from cart"""
         cart_item = self.session.query(CartItem).filter(
             and_(
@@ -286,7 +285,7 @@ class BuyerService:
         orders = self.session.query(Order).filter(Order.user_id == user_id).options(joinedload(Order.items).options(joinedload(OrderItem.product))).order_by(desc(Order.created_at)).all()
         return orders
 
-    def get_order_by_id(self, user_id: int, order_id: UUID) -> OrderResponse:
+    def get_order_by_id(self, user_id: int, order_id: str) -> OrderResponse:
         """Get specific order by ID"""
         order = self.session.query(Order).options(
             joinedload(Order.items

@@ -2,7 +2,7 @@ from math import prod
 import dodopayments
 from typing import Dict, Any, Optional, List
 from decimal import Decimal
-from uuid import UUID
+from str import str
 
 from dodopayments.types import AttachExistingCustomerParam, CheckoutSessionResponse, Customer, NewCustomerParam, TaxCategory, Currency, Product as DodoProduct
 from dodopayments.types.payment import ProductCart
@@ -28,7 +28,7 @@ class DodoPaymentsService:
         customer_email: str,
         customer_name: str,
         user_id: int,
-        order_id: UUID,
+        order_id: str,
         existing_customer_id: Optional[str] = None,
         metadata: Optional[Dict[str, str]] = None
     ) -> CheckoutSessionResponse:

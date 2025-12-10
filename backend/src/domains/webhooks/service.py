@@ -1,5 +1,4 @@
 from typing import Dict, Any
-from uuid import UUID
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
@@ -43,7 +42,7 @@ class WebhookService:
             return {"status": "ignored", "reason": "No order_id in metadata"}
         
         try:
-            order_uuid = UUID(order_id)
+            str = str(order_id)
         except ValueError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -51,7 +50,7 @@ class WebhookService:
             )
         
         # Get the order
-        order = self.session.query(Order).filter(Order.id == order_uuid).first()
+        order = self.session.query(Order).filter(Order.id == str).first()
         
         if not order:
             raise HTTPException(

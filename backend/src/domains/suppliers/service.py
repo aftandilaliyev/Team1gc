@@ -1,5 +1,4 @@
 from typing import List
-from uuid import UUID
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, desc
 from fastapi import HTTPException, status
@@ -52,7 +51,7 @@ class SupplierService:
         
         return orders
 
-    def get_order_by_id(self, user_id: int, order_id: UUID) -> OrderResponse:
+    def get_order_by_id(self, user_id: int, order_id: str) -> OrderResponse:
         """Get specific order details"""
         self._verify_supplier_access(user_id)
         
@@ -66,7 +65,7 @@ class SupplierService:
         
         return order
 
-    def approve_order(self, user_id: int, order_id: UUID) -> OrderResponse:
+    def approve_order(self, user_id: int, order_id: str) -> OrderResponse:
         """Approve an order (move from confirmed to shipped)"""
         self._verify_supplier_access(user_id)
         
@@ -93,7 +92,7 @@ class SupplierService:
         
         return order
 
-    def update_order_status(self, user_id: int, order_id: UUID, status_update: OrderUpdate) -> OrderResponse:
+    def update_order_status(self, user_id: int, order_id: str, status_update: OrderUpdate) -> OrderResponse:
         """Update order status (suppliers have broader permissions)"""
         self._verify_supplier_access(user_id)
         
