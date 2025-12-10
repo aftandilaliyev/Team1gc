@@ -164,9 +164,9 @@ export default function CatalogPage() {
           {products.map((product) => (
             <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200">
-                {product.image_url ? (
+                {product.images.length > 0 ? (
                   <img
-                    src={product.image_url}
+                    src={product.images[0]}
                     alt={product.name}
                     className="h-48 w-full object-cover object-center"
                   />
