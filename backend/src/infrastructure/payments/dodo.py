@@ -2,7 +2,6 @@ from math import prod
 import dodopayments
 from typing import Dict, Any, Optional, List
 from decimal import Decimal
-from str import str
 
 from dodopayments.types import AttachExistingCustomerParam, CheckoutSessionResponse, Customer, NewCustomerParam, TaxCategory, Currency, Product as DodoProduct
 from dodopayments.types.payment import ProductCart
