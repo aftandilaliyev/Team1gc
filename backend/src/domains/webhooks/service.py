@@ -43,25 +43,23 @@ class WebhookService:
         
         # Extract user ID from metadata
         user_id = None
-        if data.metadata and data.metadata.user_id:
-            try:
-                user_id = int(data.metadata.user_id)
-            except (ValueError, AttributeError):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Invalid user ID format"
-                )
+        if data.metadata and isinstance(data.metadata, dict):
+            user_id_str = data.metadata.get('user_id')
+            if user_id_str:
+                try:
+                    user_id = int(user_id_str)
+                except (ValueError, TypeError):
+                    pass
         
         if not user_id:
             return {"status": "ignored", "reason": "No user_id in metadata"}
         
         # Check if order_id exists in metadata (for backward compatibility)
         order_id = None
-        if hasattr(data.metadata, 'order_id') and data.metadata.order_id:
-            try:
-                order_id = str(data.metadata.order_id)
-            except ValueError:
-                pass
+        if data.metadata and isinstance(data.metadata, dict):
+            order_id_val = data.metadata.get('order_id')
+            if order_id_val and order_id_val != "None":
+                order_id = str(order_id_val)
         
         # Get existing order if order_id is provided
         order = None
@@ -88,14 +86,14 @@ class WebhookService:
                 order.status = OrderStatus.CONFIRMED.value
                 
                 # Update addresses from DodoPayments data
-                if hasattr(data, 'billing_address') and data.billing_address:
-                    billing_addr = data.billing_address
-                    order.billing_address = self._format_address(billing_addr)
+                if hasattr(data, 'billing') and data.billing:
+                    order.billing_address = self._format_address_dict(data.billing)
+                elif hasattr(data, 'billing_address') and data.billing_address:
+                    order.billing_address = self._format_address(data.billing_address)
                 
                 if hasattr(data, 'shipping_address') and data.shipping_address:
-                    shipping_addr = data.shipping_address
-                    order.shipping_address = self._format_address(shipping_addr)
-                elif hasattr(data, 'billing_address') and data.billing_address:
+                    order.shipping_address = self._format_address(data.shipping_address)
+                elif order.billing_address:
                     # Use billing address as shipping address if no separate shipping address
                     order.shipping_address = order.billing_address
                 
@@ -148,7 +146,10 @@ class WebhookService:
         billing_address = ""
         shipping_address = ""
         
-        if hasattr(data, 'billing_address') and data.billing_address:
+        # Handle billing address from actual webhook format
+        if hasattr(data, 'billing') and data.billing:
+            billing_address = self._format_address_dict(data.billing)
+        elif hasattr(data, 'billing_address') and data.billing_address:
             billing_address = self._format_address(data.billing_address)
         
         if hasattr(data, 'shipping_address') and data.shipping_address:
@@ -258,5 +259,25 @@ class WebhookService:
             parts.append(address.postal_code)
         if hasattr(address, 'country') and address.country:
             parts.append(address.country)
+        
+        return ", ".join(parts)
+    
+    def _format_address_dict(self, address_dict) -> str:
+        """Format address dictionary into a string"""
+        if not address_dict or not isinstance(address_dict, dict):
+            return ""
+        
+        parts = []
+        # Handle DodoPayments webhook address format
+        if address_dict.get('street'):
+            parts.append(address_dict['street'])
+        if address_dict.get('city'):
+            parts.append(address_dict['city'])
+        if address_dict.get('state'):
+            parts.append(address_dict['state'])
+        if address_dict.get('zipcode'):
+            parts.append(address_dict['zipcode'])
+        if address_dict.get('country'):
+            parts.append(address_dict['country'])
         
         return ", ".join(parts)
