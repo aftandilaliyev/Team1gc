@@ -46,4 +46,9 @@ class WebhookData(BaseModel):
 
 class WebhookRequest(BaseModel):
     data: WebhookData
-    event_type: str
+    type: str  # DodoPayments uses 'type' not 'event_type'
+    business_id: Optional[str] = None
+    timestamp: Optional[str] = None
+    
+    class Config:
+        extra = "allow"  # Allow extra fields

@@ -31,14 +31,28 @@ class WebhookService:
 
         # extract schema from payload
         try:
-            payload = WebhookRequest(**json.loads(payload))
-        except Exception as e:
+            # First parse JSON
+            json_payload = json.loads(payload)
+            print(f"Parsed JSON payload: {json_payload}")  # Debug log
+            
+            # Then validate with schema
+            payload = WebhookRequest(**json_payload)
+            print(f"Successfully parsed webhook: {payload.type}")  # Debug log
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error: {e}")  # Debug log
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid webhook payload"
+                detail=f"Invalid JSON payload: {str(e)}"
+            )
+        except Exception as e:
+            print(f"Schema validation error: {e}")  # Debug log
+            print(f"Raw payload: {payload}")  # Debug log
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid webhook payload: {str(e)}"
             )
         
-        event_type = payload.event_type
+        event_type = payload.type  # DodoPayments uses 'type' field
         data = payload.data
         
         # Extract user ID from metadata
