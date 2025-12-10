@@ -20,24 +20,17 @@ class Customer(BaseModel):
 
 class PaymentMetadata(BaseModel):
     company_id: Optional[str] = None
-    user_id: Optional[str] = None  # Changed to string to match actual webhook
+    user_id: Optional[str] = None
     order_id: Optional[str] = None
 
 
 class WebhookData(BaseModel):
-    subscription_id: Optional[str] = None
-    status: str
-    product_id: Optional[str] = None
     customer: Optional[Customer] = None
-    metadata: Optional[dict] = None  # Changed to dict to handle flexible metadata
-    next_billing_date: Optional[datetime] = None
-    billing_address: Optional[Address] = None
-    shipping_address: Optional[Address] = None
-    billing: Optional[dict] = None  # Add billing field from actual webhook
+    metadata: Optional[dict] = None
+    billing: Optional[dict] = None
     payment_intent_id: Optional[str] = None
-    payment_id: Optional[str] = None  # Add payment_id from actual webhook
-    amount: Optional[int] = None
-    total_amount: Optional[int] = None  # Add total_amount from actual webhook
+    payment_id: Optional[str] = None
+    total_amount: Optional[int] = None
     currency: Optional[str] = None
     
     class Config:
@@ -47,8 +40,6 @@ class WebhookData(BaseModel):
 class WebhookRequest(BaseModel):
     data: WebhookData
     type: str  # DodoPayments uses 'type' not 'event_type'
-    business_id: Optional[str] = None
-    timestamp: Optional[str] = None
-    
+
     class Config:
         extra = "allow"  # Allow extra fields
