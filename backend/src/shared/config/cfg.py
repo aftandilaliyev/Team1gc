@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import SecretStr
 
 
 class Settings(BaseSettings):
@@ -31,6 +32,13 @@ class Settings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str = ""
     AWS_REGION: str = "us-east-1"
     AWS_SES_SENDER_EMAIL: str = ""
+
+    # R2 Bucket settings
+    R2_ENDPOINT_URL: str = ""
+    R2_ACCESS_KEY_ID: SecretStr = SecretStr("")
+    R2_SECRET_ACCESS_KEY: SecretStr = SecretStr("")
+    R2_BUCKET_NAME: str = ""
+    R2_PUBLIC_DOMAIN: str = "s.fertit.com"
 
 
     model_config = SettingsConfigDict(
