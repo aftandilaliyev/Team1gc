@@ -121,7 +121,7 @@ class BuyerService:
 
     def get_cart(self, user_id: int) -> List[CartItemResponse]:
         """Get user's cart items"""
-        cart_items = self.session.query(CartItem).filter(CartItem.user_id == user_id).options(joinedload(CartItem.product)).all()
+        cart_items = self.session.query(CartItem).filter(CartItem.user_id == user_id).options(joinedload(CartItem.product).options(joinedload(Product.images))).all()
         return cart_items
 
     def update_cart_item(self, user_id: int, item_id: str, update_data: CartItemUpdate) -> CartItemResponse:
@@ -167,7 +167,7 @@ class BuyerService:
         self.session.commit()
 
     def checkout(self, user_id: int, checkout_data: CheckoutRequest) -> CheckoutResponse:
-        """Process checkout and create order with payment session"""
+        """Process checkout and create payment session (order will be created via webhook)"""
         # Get user
         user = self.session.query(User).filter(User.id == user_id).first()
         if not user:
@@ -186,7 +186,6 @@ class BuyerService:
         
         # Calculate total amount and prepare cart items for DodoPayments
         total_amount = Decimal('0')
-        order_items_data = []
         dodo_cart_items = []
         
         for cart_item in cart_items:
@@ -202,37 +201,11 @@ class BuyerService:
                 product.dodo_product_id = dodo_product_id
                 self.session.flush()  # Save the dodo_product_id
             
-            order_items_data.append({
-                'product_id': product.id,
-                'quantity': cart_item.quantity,
-                'price_at_time': product.price
-            })
-            
             dodo_cart_items.append({
                 'product_id': product.id,
                 'dodo_product_id': product.dodo_product_id,
                 'quantity': cart_item.quantity
             })
-        
-        # Create order without addresses (will be updated via webhook)
-        order = Order(
-            user_id=user_id,
-            status=OrderStatus.PENDING.value,
-            total_amount=total_amount,
-            shipping_address="",  # Will be filled from DodoPayments
-            billing_address=""    # Will be filled from DodoPayments
-        )
-        
-        self.session.add(order)
-        self.session.flush()  # Get order ID
-        
-        # Create order items
-        for item_data in order_items_data:
-            order_item = OrderItem(
-                order_id=order.id,
-                **item_data
-            )
-            self.session.add(order_item)
         
         # Get or create customer in payment system
         customer = self.session.query(Customer).filter(Customer.user_id == user_id).first()
@@ -255,26 +228,27 @@ class BuyerService:
             self.session.add(customer)
         
         # Create checkout session with proper SDK parameters
+        # Note: order_id will be None since order will be created in webhook
         payment_intent = self.dodo_payments.create_checkout_session(
             cart_items=dodo_cart_items,
             customer_email=user.email,
             customer_name=user.username,
             user_id=user_id,
-            order_id=order.id,
+            order_id=None,  # Order will be created in webhook
             existing_customer_id=customer.customer_id if customer else None,
             metadata={
-                'user_id': str(user_id),
-                'order_id': str(order.id)
+                'user_id': str(user_id)
+                # order_id will be added when order is created in webhook
             }
         )
         
-        # Clear cart after successful order creation
-        self.session.query(CartItem).filter(CartItem.user_id == user_id).delete()
+        # Do NOT clear cart - it will be cleared in webhook when payment succeeds
+        # Do NOT create order - it will be created in webhook when payment succeeds
         
         self.session.commit()
         
         return CheckoutResponse(
-            order_id=order.id,
+            order_id=None,  # No order created yet
             payment_url=payment_intent.checkout_url,
             total_amount=float(total_amount),
             status="payment_pending"
@@ -282,15 +256,17 @@ class BuyerService:
 
     def get_orders(self, user_id: int) -> List[OrderResponse]:
         """Get user's order history"""
-        orders = self.session.query(Order).filter(Order.user_id == user_id).options(joinedload(Order.items).options(joinedload(OrderItem.product))).order_by(desc(Order.created_at)).all()
+        orders = self.session.query(Order).filter(Order.user_id == user_id).options(joinedload(Order.items).options(
+            joinedload(OrderItem.product).options(joinedload(Product.images))
+        )).order_by(desc(Order.created_at)).all()
         return orders
 
     def get_order_by_id(self, user_id: int, order_id: str) -> OrderResponse:
         """Get specific order by ID"""
         order = self.session.query(Order).options(
-            joinedload(Order.items
-        ).options(
-            joinedload(OrderItem.product))
+            joinedload(Order.items).options(
+                joinedload(OrderItem.product).options(joinedload(Product.images))
+            )
         ).filter(
             and_(
                 Order.id == order_id,

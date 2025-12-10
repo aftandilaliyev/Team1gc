@@ -159,9 +159,7 @@ export default function OrdersPage() {
                         {order.items.map((item) => (
                           <div key={item.id} className="flex items-center space-x-4">
                             <div className="flex-shrink-0">
-                              <div className="h-16 w-16 bg-gray-300 rounded-md flex items-center justify-center">
-                                <span className="text-gray-500 text-xs">Product</span>
-                              </div>
+                              <img src={item?.product?.images[0].image_url} alt={item?.product?.name} width={100} height={100} />
                             </div>
                             <div className="flex-1">
                               <h5 className="font-medium text-gray-900">Product: {item?.product?.name}</h5>

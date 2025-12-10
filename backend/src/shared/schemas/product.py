@@ -26,6 +26,8 @@ class ProductBase(BaseModel):
     description: Optional[str] = None
     stock_quantity: int = Field(default=0, ge=0)
 
+class ProductWithImages(ProductBase):
+    images: List[ProductImageResponse] = []
 
 class ProductCreate(ProductBase):
     product_type: Optional[str] = Field(None, max_length=100)

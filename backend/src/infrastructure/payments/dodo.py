@@ -73,7 +73,7 @@ class DodoPaymentsService:
                 customer=customer_param,
                 product_cart=product_cart,
                 metadata=final_metadata,
-                return_url=f"{settings.FRONTEND_URL}/checkout/success?order_id={order_id}",
+                return_url=f"{settings.FRONTEND_URL}/orders",
             )
         except Exception:
             # Fallback to simpler structure if the above fails
@@ -82,7 +82,7 @@ class DodoPaymentsService:
                 customer_name=customer_name,
                 product_cart=product_cart,
                 metadata=final_metadata,
-                return_url=f"{settings.FRONTEND_URL}/checkout/success?order_id={order_id}",
+                return_url=f"{settings.FRONTEND_URL}/orders",
                 collect_billing_address=True,
                 collect_shipping_address=True
             )

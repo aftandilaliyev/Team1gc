@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, desc
 from fastapi import HTTPException, status
 
@@ -195,7 +195,7 @@ class SellerService:
         # Get orders that contain products from this seller
         orders = self.session.query(Order).join(OrderItem).join(Product).filter(
             Product.seller_id == user_id
-        ).order_by(desc(Order.created_at)).offset((page - 1) * per_page).limit(per_page).all()
+        ).options(joinedload(Order.items).options(joinedload(OrderItem.product).options(joinedload(Product.images)))).order_by(desc(Order.created_at)).offset((page - 1) * per_page).limit(per_page).all()
         
         return [OrderResponse.model_validate(order) for order in orders]
 
@@ -204,7 +204,7 @@ class SellerService:
         self._verify_seller_access(user_id)
         
         # Check if order contains seller's products
-        order = self.session.query(Order).join(OrderItem).join(Product).filter(
+        order = self.session.query(Order).join(OrderItem).join(Product).options(joinedload(Order.items).options(joinedload(OrderItem.product).options(joinedload(Product.images)))).filter(
             and_(
                 Order.id == order_id,
                 Product.seller_id == user_id

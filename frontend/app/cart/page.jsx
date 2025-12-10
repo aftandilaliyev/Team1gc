@@ -158,9 +158,9 @@ export default function CartPage() {
                   <div key={item.id} className="p-6 border-b border-gray-200 last:border-b-0">
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
-                        {item?.product?.image_url ? (
+                        {item?.product?.images? (
                           <img
-                            src={item.product?.image_url}
+                            src={item.product?.images[0].image_url}
                             alt={item.product?.name}
                             className="h-20 w-20 object-cover rounded-md"
                           />

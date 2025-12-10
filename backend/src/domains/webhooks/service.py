@@ -1,8 +1,11 @@
+import json
 from typing import Dict, Any
+from decimal import Decimal
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
-from src.shared.models.order import Order, OrderStatus
+from src.shared.models.order import Order, OrderItem, OrderStatus, CartItem
+from src.shared.models.user import User
 from src.shared.schemas.payment import WebhookRequest
 from src.infrastructure.payments import DodoPaymentsService
 
@@ -15,8 +18,7 @@ class WebhookService:
     def handle_dodo_payment_webhook(
         self, 
         payload: bytes, 
-        signature: str, 
-        webhook_data: WebhookRequest
+        signature: str
     ) -> Dict[str, Any]:
         """Handle DodoPayments webhook events"""
         
@@ -26,86 +28,170 @@ class WebhookService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid webhook signature"
             )
-        
-        event_type = webhook_data.event_type
-        data = webhook_data.data
-        
-        # Extract order ID from metadata
-        order_id = None
-        if data.metadata and data.metadata.user_id:
-            # Try to get order_id from metadata
-            order_id = data.metadata.__dict__.get('order_id')
-        
-        if not order_id:
-            # If no order_id in metadata, this might be a subscription webhook
-            # For now, we'll just log and return success
-            return {"status": "ignored", "reason": "No order_id in metadata"}
-        
+
+        # extract schema from payload
         try:
-            str = str(order_id)
-        except ValueError:
+            payload = WebhookRequest(**json.loads(payload))
+        except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid order ID format"
+                detail="Invalid webhook payload"
             )
         
-        # Get the order
-        order = self.session.query(Order).filter(Order.id == str).first()
+        event_type = payload.event_type
+        data = payload.data
         
-        if not order:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Order not found"
-            )
+        # Extract user ID from metadata
+        user_id = None
+        if data.metadata and data.metadata.user_id:
+            try:
+                user_id = int(data.metadata.user_id)
+            except (ValueError, AttributeError):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid user ID format"
+                )
+        
+        if not user_id:
+            return {"status": "ignored", "reason": "No user_id in metadata"}
+        
+        # Check if order_id exists in metadata (for backward compatibility)
+        order_id = None
+        if hasattr(data.metadata, 'order_id') and data.metadata.order_id:
+            try:
+                order_id = str(data.metadata.order_id)
+            except ValueError:
+                pass
+        
+        # Get existing order if order_id is provided
+        order = None
+        if order_id:
+            order = self.session.query(Order).filter(Order.id == order_id).first()
         
         # Handle different event types
         if event_type == "payment.succeeded":
-            return self._handle_payment_succeeded(order, data)
+            return self._handle_payment_succeeded(order, data, user_id)
         elif event_type == "payment.failed":
-            return self._handle_payment_failed(order, data)
+            return self._handle_payment_failed(order, data, user_id)
         elif event_type == "payment.refunded":
-            return self._handle_payment_refunded(order, data)
+            return self._handle_payment_refunded(order, data, user_id)
         else:
             # Unknown event type, just log and return success
             return {"status": "ignored", "reason": f"Unknown event type: {event_type}"}
 
-    def _handle_payment_succeeded(self, order: Order, data: Any) -> Dict[str, Any]:
-        """Handle successful payment and update order with address information"""
+    def _handle_payment_succeeded(self, order: Order, data: Any, user_id: int) -> Dict[str, Any]:
+        """Handle successful payment - create order from cart items and clear cart"""
         
-        # Update order status to confirmed if it's still pending
-        if order.status == OrderStatus.PENDING.value:
-            order.status = OrderStatus.CONFIRMED.value
-            
-            # Update addresses from DodoPayments data
-            if hasattr(data, 'billing_address') and data.billing_address:
-                billing_addr = data.billing_address
-                order.billing_address = self._format_address(billing_addr)
-            
-            if hasattr(data, 'shipping_address') and data.shipping_address:
-                shipping_addr = data.shipping_address
-                order.shipping_address = self._format_address(shipping_addr)
-            elif hasattr(data, 'billing_address') and data.billing_address:
-                # Use billing address as shipping address if no separate shipping address
-                order.shipping_address = order.billing_address
-            
-            self.session.commit()
-            
+        # If order already exists, just update it
+        if order:
+            if order.status == OrderStatus.PENDING.value:
+                order.status = OrderStatus.CONFIRMED.value
+                
+                # Update addresses from DodoPayments data
+                if hasattr(data, 'billing_address') and data.billing_address:
+                    billing_addr = data.billing_address
+                    order.billing_address = self._format_address(billing_addr)
+                
+                if hasattr(data, 'shipping_address') and data.shipping_address:
+                    shipping_addr = data.shipping_address
+                    order.shipping_address = self._format_address(shipping_addr)
+                elif hasattr(data, 'billing_address') and data.billing_address:
+                    # Use billing address as shipping address if no separate shipping address
+                    order.shipping_address = order.billing_address
+                
+                self.session.commit()
+                
+                return {
+                    "status": "processed",
+                    "action": "order_confirmed",
+                    "order_id": str(order.id)
+                }
+            else:
+                return {
+                    "status": "ignored",
+                    "reason": f"Order already in status: {order.status}"
+                }
+        
+        # No existing order - create new order from cart items
+        # Get user
+        user = self.session.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        # Get cart items
+        cart_items = self.session.query(CartItem).filter(CartItem.user_id == user_id).all()
+        if not cart_items:
             return {
-                "status": "processed",
-                "action": "order_confirmed",
-                "order_id": str(order.id)
+                "status": "ignored",
+                "reason": "No cart items found for user"
             }
         
+        # Calculate total amount and prepare order items
+        total_amount = Decimal('0')
+        order_items_data = []
+        
+        for cart_item in cart_items:
+            product = cart_item.product
+            item_total = product.price * cart_item.quantity
+            total_amount += item_total
+            
+            order_items_data.append({
+                'product_id': product.id,
+                'quantity': cart_item.quantity,
+                'price_at_time': product.price
+            })
+        
+        # Create order with addresses from payment data
+        billing_address = ""
+        shipping_address = ""
+        
+        if hasattr(data, 'billing_address') and data.billing_address:
+            billing_address = self._format_address(data.billing_address)
+        
+        if hasattr(data, 'shipping_address') and data.shipping_address:
+            shipping_address = self._format_address(data.shipping_address)
+        elif billing_address:
+            # Use billing address as shipping address if no separate shipping address
+            shipping_address = billing_address
+        
+        new_order = Order(
+            user_id=user_id,
+            status=OrderStatus.CONFIRMED.value,  # Payment already succeeded
+            total_amount=total_amount,
+            shipping_address=shipping_address,
+            billing_address=billing_address
+        )
+        
+        self.session.add(new_order)
+        self.session.flush()  # Get order ID
+        
+        # Create order items
+        for item_data in order_items_data:
+            order_item = OrderItem(
+                order_id=new_order.id,
+                **item_data
+            )
+            self.session.add(order_item)
+        
+        # Clear cart items since payment was successful
+        self.session.query(CartItem).filter(CartItem.user_id == user_id).delete()
+        
+        self.session.commit()
+        
         return {
-            "status": "ignored",
-            "reason": f"Order already in status: {order.status}"
+            "status": "processed",
+            "action": "order_created",
+            "order_id": str(new_order.id)
         }
 
-    def _handle_payment_failed(self, order: Order, data: Any) -> Dict[str, Any]:
+    def _handle_payment_failed(self, order: Order, data: Any, user_id: int) -> Dict[str, Any]:
         """Handle failed payment"""
         
-        # Update order status to cancelled if payment failed
-        if order.status == OrderStatus.PENDING.value:
+        # If order exists, update status to cancelled
+        if order and order.status == OrderStatus.PENDING.value:
             order.status = OrderStatus.CANCELLED.value
             self.session.commit()
             
@@ -115,13 +201,28 @@ class WebhookService:
                 "order_id": str(order.id)
             }
         
+        # If no order exists, just return success (cart items remain for retry)
+        if not order:
+            return {
+                "status": "processed",
+                "action": "payment_failed_no_order",
+                "reason": "Payment failed, cart items preserved for retry"
+            }
+        
         return {
             "status": "ignored",
             "reason": f"Order already in status: {order.status}"
         }
 
-    def _handle_payment_refunded(self, order: Order, data: Any) -> Dict[str, Any]:
+    def _handle_payment_refunded(self, order: Order, data: Any, user_id: int) -> Dict[str, Any]:
         """Handle payment refund"""
+        
+        # Only handle refunds if order exists
+        if not order:
+            return {
+                "status": "ignored",
+                "reason": "No order found for refund"
+            }
         
         # Update order status to cancelled if refunded
         if order.status in [OrderStatus.CONFIRMED.value, OrderStatus.SHIPPED.value]:

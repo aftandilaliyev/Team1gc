@@ -3,7 +3,7 @@ from enum import StrEnum
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
-from src.shared.schemas.product import ProductBase
+from src.shared.schemas.product import ProductBase, ProductWithImages
 # from src.shared.schemas.product import ProductBase
 
 
@@ -38,7 +38,7 @@ class CartItemResponse(CartItemBase):
 class CartItemWithProductResponse(CartItemBase):
     id: str
     user_id: int
-    product: ProductBase | None = None
+    product: ProductWithImages | None = None
     
     class Config:
         from_attributes = True
@@ -49,7 +49,7 @@ class OrderItemResponse(BaseModel):
     product_id: str
     quantity: int
     price_at_time: float
-    product: ProductBase | None = None
+    product: ProductWithImages | None = None
     
     class Config:
         from_attributes = True
@@ -101,7 +101,7 @@ class CheckoutRequest(BaseModel):
 
 
 class CheckoutResponse(BaseModel):
-    order_id: str
+    order_id: Optional[str] = None
     payment_url: Optional[str] = None
     total_amount: float
     status: str

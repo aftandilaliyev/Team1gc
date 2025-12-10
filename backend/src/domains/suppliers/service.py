@@ -6,7 +6,7 @@ from fastapi import HTTPException, status
 from src.shared.models.order import Order, OrderItem, OrderStatus
 from src.shared.models.user import User, UserRole
 from src.shared.schemas.order import OrderResponse, OrderUpdate
-
+from src.shared.models.product import Product
 
 class SupplierService:
     def __init__(self, session: Session):
@@ -37,7 +37,7 @@ class SupplierService:
         # Get orders that are confirmed and need supplier approval
         orders = self.session.query(Order).filter(
             Order.status == OrderStatus.CONFIRMED.value
-        ).order_by(desc(Order.created_at)).offset((page - 1) * per_page).limit(per_page).all()
+        ).options(joinedload(Order.items).options(joinedload(OrderItem.product).options(joinedload(Product.images)))).order_by(desc(Order.created_at)).offset((page - 1) * per_page).limit(per_page).all()
         
         return orders
 
@@ -46,7 +46,7 @@ class SupplierService:
         self._verify_supplier_access(user_id)
         
         orders = self.session.query(Order).options(
-            joinedload(Order.items).options(joinedload(OrderItem.product))
+            joinedload(Order.items).options(joinedload(OrderItem.product).options(joinedload(Product.images)))
         ).order_by(desc(Order.created_at)).offset((page - 1) * per_page).limit(per_page).all()
         
         return orders
@@ -55,7 +55,7 @@ class SupplierService:
         """Get specific order details"""
         self._verify_supplier_access(user_id)
         
-        order = self.session.query(Order).filter(Order.id == order_id).first()
+        order = self.session.query(Order).options(joinedload(Order.items).options(joinedload(OrderItem.product).options(joinedload(Product.images)))).filter(Order.id == order_id).first()
         
         if not order:
             raise HTTPException(
@@ -69,7 +69,7 @@ class SupplierService:
         """Approve an order (move from confirmed to shipped)"""
         self._verify_supplier_access(user_id)
         
-        order = self.session.query(Order).filter(Order.id == order_id).first()
+        order = self.session.query(Order).options(joinedload(Order.items).options(joinedload(OrderItem.product).options(joinedload(Product.images)))).filter(Order.id == order_id).first()
         
         if not order:
             raise HTTPException(
