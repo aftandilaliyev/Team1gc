@@ -15,8 +15,8 @@ class DodoPaymentsService:
     """Service for integrating with DodoPayments using official SDK"""
     
     def __init__(self):
-        self.api_key = getattr(settings, 'DODO_PAYMENTS_API_KEY', '')
-        self.webhook_secret = getattr(settings, 'DODO_PAYMENTS_WEBHOOK_SECRET', '')
+        self.api_key = settings.DODO_PAYMENTS_API_KEY
+        self.webhook_secret = settings.DODO_PAYMENTS_WEBHOOK_SECRET
         
         # Initialize DodoPayments client
         self.client = dodopayments.DodoPayments(bearer_token=self.api_key, environment="test_mode")
@@ -113,12 +113,13 @@ class DodoPaymentsService:
     def verify_webhook_signature(self, payload: bytes, signature: str) -> bool:
         """Verify webhook signature from DodoPayments"""
         try:
-            # Try using SDK's webhook verification if available
-            return self.client.webhooks.verify_signature(payload, signature, self.webhook_secret)
-        except AttributeError:
-            # Fallback to manual verification if SDK doesn't provide this method
             import hmac
             import hashlib
+            
+            # Check if webhook secret is configured
+            if not self.webhook_secret:
+                # If no webhook secret is configured, skip verification for development
+                return True
             
             expected_signature = hmac.new(
                 self.webhook_secret.encode('utf-8'),
@@ -127,7 +128,9 @@ class DodoPaymentsService:
             ).hexdigest()
             
             return hmac.compare_digest(f"sha256={expected_signature}", signature)
-    
+        except Exception:
+            return False
+
     def create_customer(self, email: str, name: str, user_id: int) -> Customer:
         """Create a customer in DodoPayments"""
         

@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # DodoPayments settings
     DODO_PAYMENTS_API_KEY: str = ""
     DODO_PAYMENTS_BASE_URL: str = "https://api.dodopayments.com"
-    DODO_PAYMENTS_WEBHOOK_SECRET: str = ""
+    DODO_PAYMENTS_WEBHOOK_SECRET: str
     
     # Frontend/Backend URLs for payment redirects
     FRONTEND_URL: str = "http://localhost:3000"
