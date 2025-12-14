@@ -5,55 +5,47 @@ import { useRouter } from 'next/navigation';
 import Navigation from '../../components/Navigation.jsx';
 import { client } from '../../lib/api.jsx';
 
-// Astrology quiz questions
+// Personal astrology quiz questions
 const quizQuestions = [
   {
     id: 1,
-    question: "What is the ruling planet of Scorpio?",
-    options: ["Mars", "Pluto", "Venus", "Jupiter"],
-    correct: 1
+    question: "What energy are you seeking right now?",
+    options: ["Protection and grounding", "Love and compassion", "Intuition and clarity", "Success and abundance"]
   },
   {
     id: 2,
-    question: "Which zodiac sign is associated with the element of Air?",
-    options: ["Aries", "Gemini", "Cancer", "Scorpio"],
-    correct: 1
+    question: "Which element resonates with you most?",
+    options: ["Fire - Passion and action", "Water - Emotion and flow", "Earth - Stability and growth", "Air - Communication and freedom"]
   },
   {
     id: 3,
-    question: "What is the birthstone for the month of October?",
-    options: ["Diamond", "Opal", "Ruby", "Emerald"],
-    correct: 1
+    question: "What time of day do you feel most connected to your spiritual self?",
+    options: ["Dawn - New beginnings", "Noon - Peak energy", "Sunset - Reflection", "Midnight - Deep intuition"]
   },
   {
     id: 4,
-    question: "Which crystal is known for its protective properties?",
-    options: ["Rose Quartz", "Obsidian", "Amethyst", "Citrine"],
-    correct: 1
+    question: "How do you prefer to wear or carry crystals?",
+    options: ["As jewelry (necklace, ring)", "In a pocket or pouch", "As a decorative piece", "As a keychain or accessory"]
   },
   {
     id: 5,
-    question: "What does a Full Moon represent in astrology?",
-    options: ["New beginnings", "Completion and release", "Communication", "Transformation"],
-    correct: 1
+    question: "What color palette draws you in?",
+    options: ["Deep blues and purples", "Greens and earth tones", "Pinks and whites", "Blacks and grays"]
   },
   {
     id: 6,
-    question: "Which zodiac sign is ruled by Mercury?",
-    options: ["Taurus", "Virgo", "Pisces", "Leo"],
-    correct: 1
+    question: "What is your primary intention with crystals?",
+    options: ["Emotional healing", "Physical protection", "Spiritual growth", "Manifestation"]
   },
   {
     id: 7,
-    question: "What is the meaning of the number 7 in numerology?",
-    options: ["Success and abundance", "Spiritual awakening", "Partnership", "Leadership"],
-    correct: 1
+    question: "Which moon phase do you feel most aligned with?",
+    options: ["New Moon - Setting intentions", "Full Moon - Releasing and celebrating", "Waxing Moon - Building energy", "Waning Moon - Letting go"]
   },
   {
     id: 8,
-    question: "Which crystal is associated with the heart chakra?",
-    options: ["Lapis Lazuli", "Rose Quartz", "Tiger's Eye", "Obsidian"],
-    correct: 1
+    question: "What size crystal piece do you prefer?",
+    options: ["Small and subtle", "Medium and noticeable", "Large and statement", "Any size works"]
   }
 ];
 
@@ -114,6 +106,8 @@ export default function BuyerPage() {
     const shuffledProducts = [...productsToSearch].sort(() => Math.random() - 0.5);
     
     for (const productName of shuffledProducts) {
+      if (foundProducts.length >= 3) break; // Limit to 3 products
+      
       try {
         const response = await client.productsApi.getProductsApiV1ProductsGet(
           1, // page
@@ -126,21 +120,21 @@ export default function BuyerPage() {
         );
         
         if (response.data.products && response.data.products.length > 0) {
-          // Add products that match (avoid duplicates)
-          response.data.products.forEach(product => {
-            if (!foundProducts.find(p => p.id === product.id)) {
-              foundProducts.push(product);
-            }
-          });
+          // Add first product that matches (avoid duplicates)
+          const product = response.data.products.find(p => 
+            !foundProducts.find(fp => fp.id === p.id)
+          );
+          if (product) {
+            foundProducts.push(product);
+          }
         }
       } catch (err) {
         console.error(`Failed to search for ${productName}:`, err);
       }
     }
 
-    // If we found products, use them; otherwise try searching without specific names
-    if (foundProducts.length === 0) {
-      // Try a broader search
+    // If we haven't found 3 products yet, try a broader search
+    if (foundProducts.length < 3) {
       try {
         const response = await client.productsApi.getProductsApiV1ProductsGet(
           1,
@@ -155,13 +149,15 @@ export default function BuyerPage() {
           // Filter products that might match our search terms
           const searchTerms = productsToSearch.map(term => term.toLowerCase());
           const matchingProducts = response.data.products.filter(product => {
+            if (foundProducts.length >= 3) return false;
+            if (foundProducts.find(p => p.id === product.id)) return false;
             const productNameLower = product.name.toLowerCase();
             const descLower = (product.description || '').toLowerCase();
             return searchTerms.some(term => 
               productNameLower.includes(term) || descLower.includes(term)
             );
           });
-          foundProducts.push(...matchingProducts);
+          foundProducts.push(...matchingProducts.slice(0, 3 - foundProducts.length));
         }
       } catch (err) {
         console.error('Failed to fetch products:', err);
@@ -169,7 +165,8 @@ export default function BuyerPage() {
       }
     }
 
-    setProducts(foundProducts);
+    // Ensure we only have maximum 3 products
+    setProducts(foundProducts.slice(0, 3));
     setLoading(false);
     setSearchingProducts(false);
   };
@@ -200,16 +197,6 @@ export default function BuyerPage() {
     }).format(price);
   };
 
-  const calculateScore = () => {
-    let correct = 0;
-    quizQuestions.forEach(q => {
-      if (answers[q.id] === q.correct) {
-        correct++;
-      }
-    });
-    return correct;
-  };
-
   if (!quizCompleted) {
     const currentQuestion = quizQuestions[currentQuestionIndex];
     const selectedAnswer = answers[currentQuestion.id];
@@ -219,9 +206,9 @@ export default function BuyerPage() {
         <Navigation />
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Astrology Quiz</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Astrology Personal Quiz</h1>
             <p className="text-gray-600 mb-8">
-              Test your knowledge of astrology and crystals!
+              Discover your perfect crystal match based on your personal preferences!
             </p>
 
             <div className="mb-6">
@@ -291,11 +278,11 @@ export default function BuyerPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h1>
           <p className="text-gray-600 mb-4">
-            You scored {calculateScore()} out of {quizQuestions.length} questions correctly.
+            Based on your answers, we've found some perfect crystal matches for you!
           </p>
           {searchingProducts && (
             <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
-              Searching for recommended products...
+              Finding your perfect crystal matches...
             </div>
           )}
         </div>
@@ -316,7 +303,7 @@ export default function BuyerPage() {
               Recommended Products for You
             </h2>
             {products.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map((product) => (
                   <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                     <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200">

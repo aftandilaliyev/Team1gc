@@ -24,7 +24,7 @@ export default function CatalogPage() {
     try {
       const response = await client.productsApi.getProductsApiV1ProductsGet(
         filters.page,
-        12, // elements
+        20, // elements
         filters.price_min ? parseFloat(filters.price_min) : undefined,
         filters.price_max ? parseFloat(filters.price_max) : undefined,
         undefined, // productType
