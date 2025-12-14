@@ -85,7 +85,6 @@ export default function CartPage() {
       };
 
       const response = await client.buyerApi.checkoutApiV1BuyersCheckoutPost(checkoutData);
-      alert('Order placed successfully!');
       router.push(response.data.payment_url);
     } catch (err) {
       alert('Checkout failed. Please try again.');

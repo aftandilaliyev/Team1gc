@@ -145,8 +145,8 @@ export default function CatalogPage() {
                 className="w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="created_at">Newest</option>
-                <option value="price">Price: Low to High</option>
-                <option value="-price">Price: High to Low</option>
+                <option value="price">Price: High to Low</option>
+                <option value="-price">Price: Low to High</option>
                 <option value="name">Name</option>
               </select>
             </div>
