@@ -1,3 +1,5 @@
 dev_scripts
 .env
-__pycache__images/
+__pycache__
+images/
+*.db
