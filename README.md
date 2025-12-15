@@ -40,34 +40,6 @@ A full-stack e-commerce platform for buying and selling gemstones, built with Fa
 - **State Management**: React Context API
 - **API Client**: Auto-generated TypeScript SDK
 
-## 🎯 SOLID Principles Implementation
-
-This project follows SOLID principles to ensure maintainable and extensible code:
-
-**Single Responsibility Principle (SRP)**: Each class has one clear responsibility. `BuyerService` handles buyer operations, `SellerService` manages seller functionality, `DodoPaymentsService` handles payment processing, and routers only handle HTTP request/response concerns. This separation ensures changes to one domain don't affect others.
-
-**Open/Closed Principle (OCP)**: The codebase is open for extension but closed for modification. The `BaseBucketManager` abstract class allows adding new storage implementations (S3, Azure, etc.) without changing existing code. Domain services can be extended with new methods without modifying core functionality.
-
-**Liskov Substitution Principle (LSP)**: Any implementation of `BaseBucketManager` can be substituted without breaking the application. The abstract base class defines a contract that all implementations must follow, ensuring consistent behavior across different storage backends.
-
-**Interface Segregation Principle (ISP)**: Interfaces are focused and specific. `BaseBucketManager` provides only the methods needed for file storage operations, avoiding fat interfaces. Services depend on specific abstractions (like `Session` for database operations) rather than large, monolithic interfaces.
-
-**Dependency Inversion Principle (DIP)**: High-level modules depend on abstractions, not concretions. Services depend on `Session` (abstraction) rather than specific database implementations. FastAPI's `Depends()` injects dependencies, allowing easy swapping of implementations. Payment services, database sessions, and storage managers are all injected, making the system testable and flexible.
-
-## 🗄️ Database Design Principles
-
-The database design follows normalization and best practices for e-commerce applications:
-
-**Normalization**: The schema is normalized to 3NF, eliminating redundancy. User data, products, orders, and payment information are stored in separate tables with proper foreign key relationships. This prevents data duplication and ensures consistency.
-
-**Referential Integrity**: Foreign keys enforce relationships between tables (e.g., `products.seller_id → users.id`, `order_items.order_id → orders.id`). Cascade deletes maintain data integrity—deleting a user removes their products and cart items, while order history is preserved through careful foreign key design.
-
-**Historical Data Preservation**: The `order_items.price_at_time` field stores product prices at the time of purchase, creating an immutable snapshot. This ensures order history remains accurate even if product prices change later, which is critical for financial records and customer disputes.
-
-**Scalability Considerations**: UUIDs are used for most entities (products, orders, cart items) instead of auto-incrementing integers, enabling distributed system support and preventing ID collisions in microservices architectures. Indexes on frequently queried columns (`users.email`, `users.username`, foreign keys) optimize query performance.
-
-**Data Integrity**: Constraints ensure data quality—unique constraints on emails and usernames prevent duplicates, NOT NULL constraints enforce required fields, and default values provide sensible defaults (e.g., `is_active = TRUE`, `role = 'buyer'`). The schema supports timezone-aware timestamps for accurate global order tracking.
-
 ## 📁 Project Structure
 
 ```
@@ -95,7 +67,7 @@ Team1gc/
 │   │   │   └── utils/      # Helper functions
 │   │   └── main.py         # Application entry point
 │   ├── tests/              # Test suite
-│   ├── docker-compose.yml  # Docker services
+│   ├── docker-compose.yml  # Docker services (backend only)
 │   └── pyproject.toml      # Python dependencies
 │
 ├── frontend/               # Next.js frontend application
@@ -118,16 +90,18 @@ Team1gc/
 
 ## 🛠️ Prerequisites
 
-- **Docker** and **Docker Compose** (for containerized setup)
-- **Node.js** 18+ and **npm** (for frontend development)
-- **Python** 3.12+ and **uv** (for backend development)
-- **MySQL** database (or use Docker Compose)
+- **Docker** and **Docker Compose** (for backend containerized setup)
+- **Node.js** 18+ and **npm** (for frontend development - required)
+- **Python** 3.12+ and **uv** (for backend development if running manually)
+- **MySQL** database (or use Docker Compose for backend)
 - **DodoPayments** account (for payment processing)
 - **AWS S3** bucket (for file storage)
 
 ## 🚀 Quick Start
 
-### Using Docker (Recommended)
+### Backend Setup (Using Docker Compose)
+
+The backend uses Docker Compose to run the application and MySQL database together.
 
 1. **Clone the repository**
    ```bash
@@ -135,29 +109,31 @@ Team1gc/
    cd Team1gc
    ```
 
-2. **Set up environment variables**
+2. **Set up backend environment variables**
    ```bash
-   # Backend
    cd backend
    cp .env.template .env
    # Edit .env with your configuration
    ```
 
-3. **Start the application**
+3. **Start the backend services**
    ```bash
-   # From project root
+   # From backend directory
    docker compose up --build
    ```
 
+   This will start:
+   - MySQL database container
+   - FastAPI backend application container
+
    Or use the Makefile:
    ```bash
-   make setup      # Setup both backend and frontend
-   make dev        # Start development environment
+   make backend-setup  # Setup and start backend with Docker
    ```
 
-### Manual Setup
+### Backend Manual Setup (Alternative)
 
-#### Backend Setup
+If you prefer to run the backend manually without Docker:
 
 1. **Navigate to backend directory**
    ```bash
@@ -177,7 +153,7 @@ Team1gc/
 
 4. **Set up database**
    ```bash
-   # Create MySQL database
+   # Create MySQL database (or use Docker Compose for database only)
    mysql -u root -p -e "CREATE DATABASE team1gc_db;"
    
    # Run migrations (if using Alembic)
@@ -191,7 +167,9 @@ Team1gc/
    uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
    ```
 
-#### Frontend Setup
+### Frontend Setup (Manual - Required)
+
+**Note**: The frontend must be run manually. There is no Docker setup for the frontend.
 
 1. **Navigate to frontend directory**
    ```bash
@@ -214,14 +192,18 @@ Team1gc/
    npm run dev
    ```
 
+   The frontend will be available at http://localhost:3000
+
 ## 🌐 Access Points
 
-Once running, access the application at:
+Once both services are running:
 
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8000
+- **Frontend**: http://localhost:3000 (run manually with `npm run dev`)
+- **Backend API**: http://localhost:8000 (via Docker Compose or manual setup)
 - **API Documentation (Swagger)**: http://localhost:8000/docs
 - **API Documentation (ReDoc)**: http://localhost:8000/redoc
+
+**Important**: Make sure both the backend (port 8000) and frontend (port 3000) are running simultaneously.
 
 ## 📚 Documentation
 
@@ -290,15 +272,15 @@ npm test
 ### Makefile Commands
 
 ```bash
-make setup          # Setup both backend and frontend
-make dev            # Start development environment
-make backend-setup  # Setup and start backend with Docker
-make backend-down   # Stop backend Docker containers
-make frontend-setup # Install frontend dependencies
-make frontend-dev   # Start frontend development server
-make sdk-generate   # Generate TypeScript SDK from OpenAPI spec
-make sdk-push       # Push SDK to npm registry
+make backend-setup  # Setup and start backend with Docker Compose
+make backend-down    # Stop backend Docker containers
+make frontend-setup  # Install frontend dependencies
+make frontend-dev    # Start frontend development server (manual)
+make sdk-generate    # Generate TypeScript SDK from OpenAPI spec
+make sdk-push        # Push SDK to npm registry
 ```
+
+**Note**: The frontend must be started manually using `make frontend-dev` or `npm run dev` in the frontend directory.
 
 ### Backend Commands
 
@@ -382,11 +364,19 @@ Team 1 - Gem Store (Team1gc)
 - **Build errors**: Clear `.next` directory and `node_modules`, then reinstall dependencies
 - **SDK errors**: Regenerate the SDK using `make sdk-generate`
 
-### Docker Issues
+### Docker Issues (Backend Only)
 
-- **Container won't start**: Check Docker logs with `docker compose logs`
+- **Container won't start**: Check Docker logs with `docker compose logs` (from backend directory)
 - **Database not accessible**: Ensure MySQL container is running and healthy
-- **Port conflicts**: Modify ports in `docker-compose.yml`
+- **Port conflicts**: Modify ports in `backend/docker-compose.yml`
+- **Backend not accessible**: Ensure you're running Docker Compose from the `backend/` directory
+
+### Frontend Issues
+
+- **Frontend won't start**: Ensure Node.js 18+ is installed and dependencies are installed with `npm install`
+- **API connection errors**: Verify `NEXT_PUBLIC_API_URL` is set correctly in `.env.local` and backend is running on port 8000
+- **Build errors**: Clear `.next` directory and `node_modules`, then reinstall dependencies
+- **SDK errors**: Regenerate the SDK using `make sdk-generate`
 
 ## 📞 Support
 
