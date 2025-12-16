@@ -197,7 +197,7 @@ class SellerService:
             Product.seller_id == user_id
         ).options(joinedload(Order.items).options(joinedload(OrderItem.product).options(joinedload(Product.images)))).order_by(desc(Order.created_at)).offset((page - 1) * per_page).limit(per_page).all()
         
-        return [OrderResponse.model_validate(order) for order in orders]
+        return orders
 
     def get_order_by_id(self, user_id: int, order_id: str) -> OrderResponse:
         """Get specific order details (if it contains seller's products)"""
